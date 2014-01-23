@@ -1,0 +1,8 @@
+0.0
+---
+
+GET /
+GET /points
+GET /points/id
+POST /points
+

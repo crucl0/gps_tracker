@@ -1,0 +1,7 @@
+<div align="center">
+<h1> List of the all points</h1>
+
+<ul tal:condition="points">
+    <li tal:repeat="point points"><a href="${request.current_route_url()}/${point['_id']}">${point['_id']}</a></li>
+</ul>
+</div>
