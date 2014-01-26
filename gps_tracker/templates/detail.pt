@@ -27,4 +27,5 @@
         </td>
     </tr>
 </table>
+<a href="${request.route_url('points')}">back</a>
 </center>
