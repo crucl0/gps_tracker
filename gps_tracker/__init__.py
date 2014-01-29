@@ -1,4 +1,5 @@
 from pyramid.config import Configurator
+from .db import db_connection
 
 
 def main(global_config, **settings):
@@ -6,10 +7,9 @@ def main(global_config, **settings):
     """
     config = Configurator(settings=settings)
     config.add_static_view('static', 'static', cache_max_age=3600)
-
-    config.include('.db')
     config.add_route('main', '/')
     config.add_route('points', '/points')
     config.add_route('detail', '/points/{id}')
+    config.add_request_method(db_connection, 'db', reify=True)
     config.scan()
     return config.make_wsgi_app()
