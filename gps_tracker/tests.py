@@ -25,7 +25,7 @@ class DB_Tests(unittest.TestCase):
         self.config.include('gps_tracker.db')
         self.request = testing.DummyRequest()
 
-        connection = self.request.registry.mongo_connect
+        connection = self.request.registry.mongo_connection
         connection.drop_database('db_for_test')
 
     def tearDown(self):
