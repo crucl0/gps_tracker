@@ -22,9 +22,10 @@ class DB_Tests(unittest.TestCase):
     def setUp(self):
         settings = get_appsettings('settings/test.ini')
         self.config = testing.setUp(settings=settings)
-        request = testing.DummyRequest()
-        self.db = db_connection(request)
-        connection = request.registry.mongo_connect
+        self.config.include('gps_tracker.db')
+        self.request = testing.DummyRequest()
+
+        connection = self.request.registry.mongo_connect
         connection.drop_database('db_for_test')
 
     def tearDown(self):
@@ -32,7 +33,8 @@ class DB_Tests(unittest.TestCase):
 
     def test_db_connection(self):
         # test CRUD
-        collection = self.db.test_collection
+        db = db_connection(self.request)
+        collection = db.test_collection
         test_data = {"a": 1, "b": 2, "c": 3}
         collection.save(test_data)
         read_back = collection.find_one()
