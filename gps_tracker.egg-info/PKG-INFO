@@ -6,25 +6,33 @@ Home-page: UNKNOWN
 Author: UNKNOWN
 Author-email: UNKNOWN
 License: UNKNOWN
-Description: gps_tracker README
+Description: "gps_tracker" pyramid web.app.
+        
+        Store GPS-points with description and coordinates.
         
         — Starter scaffold project
             (pcreate -s starter gps_tracker)
         
-        — work with mongodb (for test :) )
+        — Work with mongodb (for test and learning)
             mongo_uri = mongodb://localhost:27017/gps
         
-        — don't look at html-tables :)
+        — Don't look at html-tables :)
         
-        — only URL Dispatch. Traversal in progress
+        — Only URL Dispatch. Traversal in progress
         
         — Sory for "beautiful" points id
+        
+        — No any validation in webform.
         
         
         0.0
         ---
         
-        -  Initial version
+        GET /
+        GET /points
+        GET /points/id
+        POST /points
+        
         
 Keywords: web pyramid pylons
 Platform: UNKNOWN

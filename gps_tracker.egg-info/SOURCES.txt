@@ -6,6 +6,8 @@ production.ini
 setup.cfg
 setup.py
 gps_tracker/__init__.py
+gps_tracker/db.py
+gps_tracker/sett.py
 gps_tracker/tests.py
 gps_tracker/views.py
 gps_tracker.egg-info/PKG-INFO
