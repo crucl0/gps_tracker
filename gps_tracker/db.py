@@ -4,13 +4,18 @@ import pymongo
 
 def includeme(request):
     settings = request.registry.settings
-    db_url = urlparse(settings['mongo_uri'])
-    settings['db_url'] = db_url
-    connection = pymongo.MongoClient(host=db_url.hostname, port=db_url.port)
+    mongo_db_url = urlparse(settings['mongo_uri'])
+    settings['mongo_db_url'] = mongo_db_url
+    settings['mongo_db_name'] = mongo_db_url.path[1:]
+    settings['mongo_hostname'] = mongo_db_url.hostname
+    settings['mongo_port'] = int(mongo_db_url.port or 27017)
+    connection = pymongo.MongoClient(host=mongo_db_url.hostname,
+                                     port=mongo_db_url.port)
     request.registry.mongo_connection = connection
 
 
 def db_connection(request):
-    db_url = request.registry.settings['db_url']
-    db = request.registry.mongo_connection[db_url.path[1:]]
-    return db
+    mongo_db_name = request.registry.settings['mongo_db_name']
+    connection = request.registry.mongo_connection
+    mongo_db = connection[mongo_db_name]
+    return mongo_db
