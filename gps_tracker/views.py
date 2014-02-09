@@ -36,7 +36,7 @@ def point_get_one(request):
 
 @view_config(route_name='point', request_method='PATCH', renderer='json')
 def point_edit_one(request):
-    return {'response': 'point edited'}
+    return points_list[1]
 
 
 @view_config(route_name='point', request_method='DELETE', renderer='json')
