@@ -17,5 +17,4 @@ def includeme(request):
 def db_connection(request):
     mongo_db_name = request.registry.settings['mongo_db_name']
     connection = request.registry.mongo_connection
-    mongo_db = connection[mongo_db_name]
-    return mongo_db
+    return connection[mongo_db_name]
