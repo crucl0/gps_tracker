@@ -20,25 +20,25 @@ points_list = [
 
 
 @view_config(route_name='points', request_method='GET', renderer='json')
-def points_get_all(self):
+def points_get_all(request):
     return points_list
 
 
 @view_config(route_name='points', request_method='POST', renderer='json')
-def point_add_new(self):
-    return {'response': 'new point added'}
+def point_add_new(request):
+    return points_list[2]
 
 
 @view_config(route_name='point', request_method='GET', renderer='json')
-def point_get_one(self):
+def point_get_one(request):
     return points_list[0]
 
 
 @view_config(route_name='point', request_method='PATCH', renderer='json')
-def point_edit_one(self):
+def point_edit_one(request):
     return {'response': 'point edited'}
 
 
 @view_config(route_name='point', request_method='DELETE', renderer='json')
-def point_delete_one(self):
-    return {'response': 'point deleted'}
+def point_delete_one(request):
+    return {}
