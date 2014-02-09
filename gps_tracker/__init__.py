@@ -9,9 +9,8 @@ def main(global_config, **settings):
     config.include('gps_tracker.db')
     config.add_static_view('static', 'static', cache_max_age=3600)
 
-    config.add_route('main', '/')
     config.add_route('points', '/points')
-    config.add_route('detail', '/points/{id}')
+    config.add_route('point', '/points/{id}')
 
     config.add_request_method(db_connection, 'db', reify=True)
     config.scan()
