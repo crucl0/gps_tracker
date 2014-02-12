@@ -13,7 +13,7 @@ def points_get_all(request):
 @view_config(route_name='points', request_method='POST', renderer='json')
 def point_add_new(request):
     try:
-        if len(request.json_body) < 4:
+        if len(request.json_body) < 3:
             return {"Error": "Expects at least 3 parameters about new point"}
         else:
             point = {key: request.json_body[key] for key in request.json_body}
