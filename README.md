@@ -1,17 +1,12 @@
-"gps_tracker" pyramid web.app.
+"GPS Tracker" — pyramid web application.
+========================================
 
 Store GPS-points with description and coordinates.
 
-— Starter scaffold project
-    (pcreate -s starter gps_tracker)
+— Project created with starter scaffold (pcreate -s starter gps_tracker), but remade on 80% 
 
-— Work with mongodb (for test and learning)
-    mongo_uri = mongodb://localhost:27017/gps
+— Work with mongodb.
 
-— Don't look at html-tables :)
+— Only URL Dispatch. Traversal in progress.
 
-— Only URL Dispatch. Traversal in progress
-
-— Sory for "beautiful" points id
-
-— No any validation in webform.
+— REST-views with some requests validation

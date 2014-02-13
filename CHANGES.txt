@@ -1,8 +1,15 @@
-0.0
+0.1
 ---
+— REST-views in "views.py":
+    GET /points
+    POST /points
+    GET /points/id
+    DELETE /points/id
+    PUT /points/id
+    PATCH /points/id
 
-GET /
-GET /points
-GET /points/id
-POST /points
-
+— All settings moved to "settings/" directory
+— Added "db.py", wich has:
+    - "includeme()" function with mongodb configuration and custom json-renderer;
+    - "mongo_db_connection()" function for connect to DataBase;
+— Added db-connections tests
