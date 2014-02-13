@@ -1,4 +1,7 @@
 from urllib.parse import urlparse
+from pyramid.renderers import JSON
+from bson.objectid import ObjectId
+import datetime
 import pymongo
 
 
@@ -14,7 +17,27 @@ def includeme(request):
     request.registry.mongo_connection = connection
 
 
-def db_connection(request):
+def mongo_db_connection(request):
     mongo_db_name = request.registry.settings['mongo_db_name']
     connection = request.registry.mongo_connection
     return connection[mongo_db_name]
+
+
+def bson_adapter(obj, request):
+    return str(obj)
+
+
+def datetime_adapter(obj, request):
+    return obj.isoformat()
+
+
+def json_cursor_adapter(obj, request):
+    return list(obj)
+
+
+def json_mongo_adapters(config):
+    json_mongo_renderer = JSON()
+    json_mongo_renderer.add_adapter(ObjectId, bson_adapter)
+    json_mongo_renderer.add_adapter(datetime.datetime, datetime_adapter)
+    json_mongo_renderer.add_adapter(pymongo.cursor.Cursor, json_cursor_adapter)
+    config.add_renderer('json', json_mongo_renderer)

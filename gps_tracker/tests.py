@@ -1,7 +1,7 @@
 import unittest
 from pyramid import testing
 from pyramid.paster import get_appsettings
-from .db import db_connection
+from .db import mongo_db_connection
 
 
 class DB_Tests(unittest.TestCase):
@@ -17,7 +17,7 @@ class DB_Tests(unittest.TestCase):
         testing.tearDown()
 
     def test_db_connection(self):
-        db = db_connection(self.request)
+        db = mongo_db_connection(self.request)
         collection = db.test_collection
         test_data = {"a": 1, "b": 2, "c": 3}
         collection.save(test_data)
