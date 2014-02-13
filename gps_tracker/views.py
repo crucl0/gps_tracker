@@ -1,12 +1,11 @@
 from pyramid.view import view_config
 from bson.objectid import ObjectId
-from bson.json_util import dumps
 from bson.errors import InvalidId
 
 
 @view_config(route_name='points', request_method='GET', renderer='json')
 def points_get_all(request):
-    points = dumps([point for point in request.mongo_db.points.find()])
+    points = [point for point in request.mongo_db.points.find()]
     return points
 
 
@@ -18,8 +17,8 @@ def point_add_new(request):
         else:
             point = {key: request.json_body[key] for key in request.json_body}
             point_new_id = request.mongo_db.points.insert(point)
-            return dumps(request.mongo_db.points.find_one(
-                {"_id": ObjectId(point_new_id)}))
+            return request.mongo_db.points.find_one(
+                {"_id": ObjectId(point_new_id)})
     except ValueError:
         return {"Error": "POST request body must be JSON"}
 
@@ -29,7 +28,7 @@ def point_get_one(request):
     try:
         _id = ObjectId(request.matchdict["id"])
         point = request.mongo_db.points.find_one({"_id": _id})
-        return dumps(point)
+        return point
     except InvalidId:
         return {"Error": "Invalid ObjectId. Check your request."}
 
@@ -50,7 +49,7 @@ def point_edit_one(request):
             updates = request.json_body
             request.mongo_db.points.update({"_id": _id},
                                            {"$set": updates})
-            return dumps(request.mongo_db.points.find_one(_id))
+            return request.mongo_db.points.find_one(_id)
     except ValueError:
         return {"Error": "PATCH request body must be JSON"}
 
@@ -71,7 +70,7 @@ def point_update_one(request):
             replacement = request.json_body
             replacement["_id"] = _id
             request.mongo_db.points.save(replacement)
-            return dumps(request.mongo_db.points.find_one(_id))
+            return request.mongo_db.points.find_one(_id)
     except ValueError:
         return {"Error": "PUT request body must be JSON"}
 
