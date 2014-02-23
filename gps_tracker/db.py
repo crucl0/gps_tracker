@@ -12,9 +12,11 @@ def includeme(config):
     settings['mongo_db_name'] = mongo_db_url.path[1:]
     settings['mongo_hostname'] = mongo_db_url.hostname
     settings['mongo_port'] = int(mongo_db_url.port or 27017)
+
     connection = pymongo.MongoClient(host=mongo_db_url.hostname,
                                      port=mongo_db_url.port)
     config.registry.mongo_connection = connection
+
     json_mongo_renderer = JSON()
     json_mongo_renderer.add_adapter(ObjectId, bson_adapter)
     json_mongo_renderer.add_adapter(datetime.datetime, datetime_adapter)
