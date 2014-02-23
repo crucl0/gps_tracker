@@ -1,5 +1,10 @@
-0.1
----
+24.12.2014:
+-----------
+— Rewrited some views functions. Temporary removed part of request validations
+— Added tests of all views functions
+
+14.12.2014:
+-----------
 — REST-views in "views.py":
     GET /points
     POST /points
