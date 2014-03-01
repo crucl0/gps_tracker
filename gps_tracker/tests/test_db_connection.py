@@ -1,12 +1,12 @@
-from .test_base import TestBase
+from .baseconfig import BaseConfig
 from gps_tracker.db import mongo_db_connection
 
 
-class DataBaseTests(TestBase):
+class DataBaseTests(BaseConfig):
     """ Try to connect to mongo_db
     """
     def test_db_connection(self):
-        request = self.test_request()
+        request = self.own_request()
         db = mongo_db_connection(request)
 
         collection = db.test_collection

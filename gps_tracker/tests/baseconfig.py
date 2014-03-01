@@ -5,7 +5,7 @@ from .some_data_for_tests import test_data
 from pyramid.paster import get_appsettings
 
 
-class TestBase(unittest.TestCase):
+class BaseConfig(unittest.TestCase):
     """ A Template of testing class
     """
     def setUp(self):
@@ -25,7 +25,7 @@ class TestBase(unittest.TestCase):
         self.mongo_connection.drop_database(self.db_name)
         testing.tearDown()
 
-    def test_request(self):
+    def own_request(self):
         """ This function adds mongodb connection to a request.
         """
         request = testing.DummyRequest()

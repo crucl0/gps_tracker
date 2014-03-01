@@ -1,15 +1,15 @@
-from .test_base import TestBase
+from .baseconfig import BaseConfig
 
 from gps_tracker.views import points_get_all
 
 
-class TestViewPointsGetAll(TestBase):
+class TestViewPointsGetAll(BaseConfig):
     """ Try to get all points
     """
     def test_points_get_all(self):
         """ Try how it realy works.
         """
-        request = self.test_request()
+        request = self.own_request()
 
         collection = points_get_all(request)
         self.assertIsInstance(collection, list)

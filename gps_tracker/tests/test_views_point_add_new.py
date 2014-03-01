@@ -1,15 +1,15 @@
-from .test_base import TestBase
+from .baseconfig import BaseConfig
 
 from gps_tracker.views import point_add_new
 
 
-class TestViewsPointAddNew(TestBase):
+class TestViewsPointAddNew(BaseConfig):
     """ Try to add new point
     """
     def test_point_add_new(self):
         """ Try how it realy works.
         """
-        request = self.test_request()
+        request = self.own_request()
 
         request.json_body = {"gas_station": "MyOwnGasStation",
                              "odometer": 7994,
