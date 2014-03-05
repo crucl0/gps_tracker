@@ -1,6 +1,6 @@
 import unittest
 from pyramid import testing
-from .some_data_for_tests import test_data
+from .fixture import fixture_points
 
 from pyramid.paster import get_appsettings
 
@@ -19,7 +19,7 @@ class BaseConfig(unittest.TestCase):
         self.db_name = self.config.registry.settings['mongo_db_name']
         self.mongo_db = self.mongo_connection[self.db_name]
         self.mongo_connection.drop_database(self.db_name)
-        self.mongo_db.points.insert(test_data)
+        self.mongo_db.points.insert(fixture_points)
 
     def tearDown(self):
         self.mongo_connection.drop_database(self.db_name)

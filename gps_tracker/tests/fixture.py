@@ -1,6 +1,6 @@
 from bson.objectid import ObjectId
 
-test_data = [
+fixture_points = [
     {"latitude": "45.215", "longitude": "14.131", "gas_station": "Lukoil",
      "odometer": "24100", "description": "Bad coffee",
      "_id": ObjectId("5309deeca7cade7139b537f9")},
