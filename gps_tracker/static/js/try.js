@@ -1,0 +1,65 @@
+'use strict';
+var map;
+var marker = null;
+
+function initialize() {
+    var mapOptions = {
+        center: new google.maps.LatLng(59.213, 39.907),
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        streetViewControl: false,
+        panControl: false,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE,
+            position: google.maps.ControlPosition.LEFT_BOTTOM
+        }
+    };
+
+    map = new google.maps.Map(document.getElementById('map_canvas'),
+        mapOptions);
+
+    drawAllPoints();
+}
+
+function drawAllPoints() {
+    var points = getFromMongo('/points');
+    for (var i=0; points[i]; i++) {
+        var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
+        addMarker(tmpLatLng);
+        var info = '<h1>' + points[i].gas_station + '</h1>' +
+        points[i].description + '<br>' +
+        '<a href=/points/'+ points[i]._id + '>details</a>';
+        addInfoWindow(marker, info);
+    }
+}
+
+function addMarker(latLng){
+    marker = new google.maps.Marker({
+        position: latLng,
+        map: map
+    });
+}
+
+function addInfoWindow(marker, message) {
+    var infoWindow = new google.maps.InfoWindow({
+        content: message
+    });
+
+    google.maps.event.addListener(marker, 'click', function () {
+        infoWindow.open(map, marker);
+        // document.getElementById('form_canvas').style.display = 'block';
+    });
+}
+
+function getFromMongo(url){
+    var request = null;
+    request = new XMLHttpRequest();
+    request.open('GET', url, false);
+    request.send(null);
+    var response = JSON.parse(request.responseText);
+
+    return response;
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+

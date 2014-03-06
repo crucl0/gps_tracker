@@ -6,6 +6,11 @@ from pyramid.httpexceptions import (HTTPNotFound,
                                     HTTPBadRequest)
 
 
+@view_config(route_name='index', renderer='gps_tracker:templates/index.pt')
+def index_view(request):
+    return {}
+
+
 @view_config(route_name='points', request_method='GET', renderer='json')
 def points_get_all(request):
     points = [point for point in request.mongo_db.points.find()]
