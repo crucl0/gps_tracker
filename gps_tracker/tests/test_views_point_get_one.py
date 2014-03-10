@@ -24,3 +24,11 @@ class TestViewsPointGetOne(BaseConfig):
         point = point_get_one(request)
         self.assertIsInstance(point, dict)
         self.assertEqual(point['gas_station'], 'Shell')
+
+    def test_valid_but_wrong_id(self):
+        """ Something is wrong with this point, eh?
+        """
+        request = self.own_request()
+        request.matchdict = {'id': '531ba74fa7cade60aa44ae8d'}
+        point_get_one(request)
+        self.assertRaises(InvalidId)

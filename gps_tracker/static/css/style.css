@@ -8,10 +8,7 @@ body { height: 100%;
               z-index: 0;
 }
 
-#form_canvas { height: 200px;
-               width: 200px;
+#form_canvas { width: 250px;
                position: absolute;
-               background-color: red;
-               z-index: 5;
                display: none;
 }

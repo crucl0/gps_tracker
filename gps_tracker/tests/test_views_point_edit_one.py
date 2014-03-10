@@ -20,7 +20,7 @@ class TestViewsPointEditOne(BaseConfig):
         self.assertIsInstance(point, HTTPNotFound)
 
     def test_valid_id(self):
-        """ This poin does exist, doesn't it?
+        """ This point exists, doesn't it?
         """
         request = self.own_request()
         request.matchdict = {'id': '5309deeca7cade7139b537f9'}
