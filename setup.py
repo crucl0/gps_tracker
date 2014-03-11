@@ -7,9 +7,10 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-    'pyramid',
+    'pyramid==1.4.5',
     'pyramid_debugtoolbar',
     'waitress',
+    'pymongo',
     ]
 
 setup(name='gps_tracker',
