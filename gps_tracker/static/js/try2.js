@@ -18,10 +18,12 @@ function initialize() {
 
       map.setCenter(pos);
         var currentPosition = addMarker(pos);
+
         marker.icon = 'http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png';
         marker.title = 'Click to add this point';
-        addInfoWindow(currentPosition, fillNewForm(pos));
+        marker.infowindow = addInfoWindow(currentPosition, fillNewForm(pos));
         document.getElementById('form_canvas').style.display = 'block';
+      
     }, function() {
       handleNoGeolocation(true);
     });
@@ -80,7 +82,6 @@ function addInfoWindow(marker, message) {
 
     google.maps.event.addListener(marker, 'click', function () {
         infoWindow.open(map, marker);
-        // document.getElementById('form_canvas').style.display = 'block';
     });
 
     return infoWindow;
@@ -104,13 +105,14 @@ function dbMarkers(){
     var marker = addMarker(tmpLatLng);
     marker.id = pointID;
     marker.fromDB = true;
+    marker.title = points[i].gas_station;
     // marker.icon = 'http://maps.google.com/mapfiles/kml/paddle/red-stars.png';
     pool.push(marker);
     var info = '<h1>' + points[i].gas_station + '</h1>' +
       'Odometer: '+ points[i].odometer + '<br>' +
       points[i].description + '<br>' +
       '<a href=/points/'+ pointID + '>details</a>';
-    addInfoWindow(marker, info);
+    marker.infowindow = addInfoWindow(marker, info);
 
   }
   return pool;
@@ -123,6 +125,7 @@ function postToMongo(){
         lat: document.getElementById('lat').value,
         lng: document.getElementById('lng').value,
         gas_station: document.getElementById('gas_station').value,
+        odometer: document.getElementById('odometer').value,
         description: document.getElementById('description').value
     };
 
@@ -131,6 +134,17 @@ function postToMongo(){
     request.open('POST', '/points', false);
     request.setRequestHeader('Content-type', 'application/json');
     request.send(JSON.stringify(data));
+    marker.fromDB = true;
+    marker.infowindow.close();
+    marker.infowindow = null;
+    marker.setIcon(null);
+    marker.title = data.gas_station + ' added';
+
+    var info = '<h1>' + data.gas_station + '</h1>' +
+      'Odometer: '+ data.odometer + '<br>' +
+      data.description + '<br>';
+    marker.infowindow = addInfoWindow(marker, info);
+    marker.infowindow.open(map, marker);
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);

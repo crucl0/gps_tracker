@@ -13,9 +13,12 @@ gps_tracker.egg-info/entry_points.txt
 gps_tracker.egg-info/not-zip-safe
 gps_tracker.egg-info/requires.txt
 gps_tracker.egg-info/top_level.txt
+gps_tracker/static/css/style.css
+gps_tracker/static/js/try2.js
+gps_tracker/templates/index.html
 gps_tracker/tests/__init__.py
-gps_tracker/tests/some_data_for_tests.py
-gps_tracker/tests/test_base.py
+gps_tracker/tests/baseconfig.py
+gps_tracker/tests/fixture.py
 gps_tracker/tests/test_db_connection.py
 gps_tracker/tests/test_views_point_add_new.py
 gps_tracker/tests/test_views_point_delete_one.py
