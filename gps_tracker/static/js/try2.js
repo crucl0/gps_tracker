@@ -19,7 +19,6 @@ function initialize() {
       map.setCenter(pos);
         var currentPosition = addMarker(pos);
 
-        marker.icon = 'http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png';
         marker.title = 'Click to add this point';
         marker.infowindow = addInfoWindow(currentPosition, fillNewForm(pos));
         document.getElementById('form_canvas').style.display = 'block';
@@ -106,7 +105,6 @@ function dbMarkers(){
     marker.id = pointID;
     marker.fromDB = true;
     marker.title = points[i].gas_station;
-    // marker.icon = 'http://maps.google.com/mapfiles/kml/paddle/red-stars.png';
     pool.push(marker);
     var info = '<h1>' + points[i].gas_station + '</h1>' +
       'Odometer: '+ points[i].odometer + '<br>' +
@@ -137,7 +135,6 @@ function postToMongo(){
     marker.fromDB = true;
     marker.infowindow.close();
     marker.infowindow = null;
-    marker.setIcon(null);
     marker.title = data.gas_station + ' added';
 
     var info = '<h1>' + data.gas_station + '</h1>' +
