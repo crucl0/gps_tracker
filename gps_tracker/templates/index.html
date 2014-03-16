@@ -15,38 +15,54 @@
   </head>
 
   <body>
+    <div class="header">
+        <div class="container">
+            <ul>
+                <li>
+                    <button class="btn" id="showLoc" onclick="geoLocation()" title="Show my current location">↻</button>
+                </li>
+                <li>
+                    <button class="btn" id="addPoint" title="Choose a point">◉</button>
+                </li>
+            </ul>
+        </div>
+    </div>
 
     <div id="map_canvas" style="width:100%; height:100%"></div>
 
     <div id="form_canvas">
-        <table>
-            <tr>
-                <td>Lat:</td>
-                <td><input type="text" maxlength="19" value="" id="lat"></td>
-            </tr>
-            <tr>
-                <td>Lng:</td>
-                <td><input type="text" maxlength="19" value="" id="lng"></td>
-            </tr>
-            <tr>
-                <td>Name:</td>
-            <td><input type="text" maxlength="50" id="gas_station"></td>
-            </tr>
-            <tr>
-                <td>Odometer:</td>
-            <td><input type="text" maxlength="7" id="odometer"></td>
-            </tr>
-            <tr>
-                <td>Description:</td>
-                <td><textarea maxlength="140" rows="8" cols="19" id="description"></textarea></td>
-            </tr>
-            <tr>
-                <td colspan="2">
-            <input type="button" id="add" value="Add this point" onClick="postToMongo()">
-                </td>
-            </tr>
-        </table>
- 
+    <form id="newForm">
+        <fieldset form="newForm"> 
+            <legend><b>NEW POINT DETAILS</b></legend> 
+         
+            <div> 
+                <label>Latitude<br>
+                <input id="lat" name="latitude" type="text" required="">
+                </label> 
+            </div>
+
+            <div> 
+                <label>Longitude<br>
+                <input id="lng" name="longitude" type="text" required=""> 
+                </label> 
+            </div>
+
+            <div> 
+                <label>Gas station<br>
+                <input id="gas_station" name="gas_station" type="text" required=""> 
+                </label> 
+            </div>
+
+            <div> 
+                <label for="description">Description:<br> 
+                <textarea id="description" name="description" rows="5" required=""></textarea>
+                </label> 
+            </div> 
+            <div>
+                <button>Add this point to DataBase</button>
+            </div>
+          </fieldset>
+    </form>
     </div>
 
   </body>
