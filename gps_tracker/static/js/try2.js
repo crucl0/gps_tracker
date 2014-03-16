@@ -42,9 +42,10 @@ function geoLocation() {
 
       map.setCenter(pos);
       var form = fillNewForm(pos);
-      marker = placeMarker(pos, form);
+
       if (infowindow) infowindow.close();
-      marker.infowindow = addInfoWindow(marker, form).open(map, marker);
+        marker = placeMarker(pos, form);
+        marker.infowindow = addInfoWindow(marker, form).open(map, marker);
     }, function() {
       handleNoGeolocation(true);
     });
@@ -93,4 +94,4 @@ function addInfoWindow(marker, message) {
     return infowindow;
 }
 
-google.maps.event.addDomListener(window, 'load', initialize);
+google.maps.event.addDomListener(window, "load", initialize);
