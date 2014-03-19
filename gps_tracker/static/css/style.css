@@ -51,9 +51,11 @@ button.btn {
     color: #000; 
 }
 
-#map_canvas { height: 100%;
-              position: absolute;
-              z-index: 0;
+#map_canvas { 
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  z-index: 0;
 }
 
 #form_canvas { 
