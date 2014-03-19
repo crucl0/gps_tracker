@@ -12,6 +12,25 @@ function initialize() {
   
   map = new google.maps.Map(document.getElementById('map_canvas'),
       mapOptions);
+
+  drawSavedPoints();
+}
+
+function drawSavedPoints(){
+  var points = getFromMongo('/points');
+  for (var i=0; points[i]; i++) {
+    var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
+    var info = '<h1>' + points[i].gas_station + '</h1>' +
+        points[i].description + '<br>' +
+        '<a href=/points/'+ points[i]._id + '>details</a>';
+        
+    var point = new Marker(addMarker(tmpLatLng), addInfoWindow(info));
+    point.marker.setTitle(points[i].gas_station);
+
+    point.id = points[i]._id;
+    point.description = points[i].description;
+    point.gas_station = points[i].gas_station;
+  }
 }
 
 function geoLocation(){
@@ -21,7 +40,7 @@ function geoLocation(){
                                        position.coords.longitude);
 
       map.setCenter(pos); 
-      map.setZoom(12);
+      // map.setZoom(12);
 
       if (currentLoc) {
         currentLoc.infowindow.close();
@@ -82,6 +101,16 @@ function fillNewForm(pos){
   formDiv.childNodes[1].lat.value = pos.lat();
   formDiv.childNodes[1].lng.value = pos.lng();
   return formDiv;
+}
+
+function getFromMongo(url){
+    var request = null;
+    request = new XMLHttpRequest();
+    request.open('GET', url, false);
+    request.send(null);
+    var response = JSON.parse(request.responseText);
+
+    return response;
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
