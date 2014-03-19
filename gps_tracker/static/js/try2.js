@@ -2,6 +2,8 @@
 
 var map;
 var currentLoc;
+var newPoint;
+var chosen;
 
 function initialize() {
 
@@ -31,6 +33,53 @@ function drawSavedPoints(){
     point.description = points[i].description;
     point.gas_station = points[i].gas_station;
   }
+}
+
+function addNewPoint() {
+  chosen = false;
+  map.setOptions({draggableCursor:'crosshair'});
+  google.maps.event.addListener(map, 'click', function(event) {
+    if (!chosen) {
+      var pos = event.latLng;
+      if (newPoint) {
+        newPoint.infowindow.close();
+        newPoint.marker.setPosition(pos);
+        newPoint.marker.setVisible(true);
+        newPoint.infowindow = addInfoWindow(fillNewForm(pos));
+        newPoint.infowindow.open(map, newPoint.marker);
+        chosen = true;
+      } else {
+      newPoint = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
+      newPoint.infowindow.open(map, newPoint.marker);
+      newPoint.marker.setDraggable(true);
+      map.setOptions({draggableCursor: null});
+      chosen = true;    
+      }
+
+    google.maps.event.addListener(newPoint.infowindow, 'closeclick', function() {
+      newPoint.marker.setVisible(false);
+      map.setOptions({draggableCursor: null});
+    });
+
+    google.maps.event.addListener(newPoint.marker, 'dragstart', function() {
+      newPoint.infowindow.close();
+    });
+
+    google.maps.event.addListener(newPoint.marker, 'dragend', function(event) {
+      var pos = event.latLng;
+      newPoint.infowindow.close();
+      newPoint.infowindow = addInfoWindow(fillNewForm(pos));
+      newPoint.infowindow.open(map, newPoint.marker);
+      map.setOptions({draggableCursor: null});
+
+      google.maps.event.addListener(newPoint.infowindow, 'closeclick', function() {
+        newPoint.marker.setVisible(false);
+        map.setOptions({draggableCursor: null});
+      });
+    });
+
+    }
+  });
 }
 
 function geoLocation(){

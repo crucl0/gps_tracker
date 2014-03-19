@@ -22,7 +22,7 @@
                     <button class="btn" id="showLoc" onclick="geoLocation()" title="Show my current location">↻</button>
                 </li>
                 <li>
-                    <button class="btn" id="addPoint" title="Choose a point">◉</button>
+                    <button class="btn" id="addPoint" onclick="addNewPoint()" title="Choose a point">◉</button>
                 </li>
             </ul>
         </div>
@@ -33,7 +33,7 @@
     <div id="form_canvas">
     <form id="newForm">
         <fieldset form="newForm"> 
-            <legend><b>NEW POINT DETAILS</b></legend> 
+            <legend><b>POINT DETAILS</b></legend> 
          
             <div> 
                 <label>Latitude<br>
@@ -59,7 +59,7 @@
                 </label> 
             </div> 
             <div>
-                <button>Add this point to DataBase</button>
+                <button onclick="postToMongo()">Add this point to DataBase</button>
             </div>
           </fieldset>
     </form>
