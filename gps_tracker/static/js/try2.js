@@ -23,9 +23,9 @@ function drawSavedPoints(){
   var points = getFromMongo('/points');
   for (var i=0; points[i]; i++) {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
-    var info = '<h1>' + points[i].gas_station + '</h1>' +
+    var info = '<div id="fromDB"><h1>' + points[i].gas_station + '</h1>' +
         points[i].description + '<br>' +
-        '<a href=/points/'+ points[i]._id + '>details</a>';
+        '<a href=/points/'+ points[i]._id + '>details</a></div>';
         
     var point = new Marker(addMarker(tmpLatLng), addInfoWindow(info));
     point.marker.setTitle(points[i].gas_station);
@@ -171,6 +171,23 @@ function getFromMongo(url){
     var response = JSON.parse(request.responseText);
 
     return response;
+}
+
+function postToMongo(){
+    var data = {
+        lat: document.getElementById('lat').value,
+        lng: document.getElementById('lng').value,
+        gas_station: document.getElementById('gas_station').value,
+        description: document.getElementById('description').value
+    };
+
+    var request = new XMLHttpRequest();
+
+    request.open('POST', '/points', false);
+    request.setRequestHeader('Content-type', 'application/json');
+    request.send(JSON.stringify(data));
+    var response = JSON.parse(request.responseText);
+    console.log(response);
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);

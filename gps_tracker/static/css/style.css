@@ -62,3 +62,7 @@ button.btn {
     display: none;
     width: 200px;    
 }
+
+#fromDB {
+  width: 200px;
+}
