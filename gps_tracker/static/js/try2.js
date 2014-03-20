@@ -4,6 +4,7 @@ var map;
 var currentLoc;
 var newPoint;
 var chosen;
+var intervalID;
 
 function initialize() {
 
@@ -53,7 +54,7 @@ function addNewPoint() {
       newPoint.infowindow.open(map, newPoint.marker);
       newPoint.marker.setDraggable(true);
       map.setOptions({draggableCursor: null});
-      chosen = true;    
+      chosen = true;
       }
 
     google.maps.event.addListener(newPoint.infowindow, 'closeclick', function() {
@@ -82,14 +83,18 @@ function addNewPoint() {
   });
 }
 
+function stopTimer(){
+  clearTimeout(intervalID);
+}
+
 function geoLocation(){
  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
 
-      map.setCenter(pos); 
-      // map.setZoom(12);
+      map.setCenter(pos);
+      map.setZoom(12);
 
       if (currentLoc) {
         currentLoc.infowindow.close();
@@ -97,19 +102,24 @@ function geoLocation(){
         currentLoc.marker.setVisible(true);
         currentLoc.infowindow = addInfoWindow(fillNewForm(pos));
         currentLoc.infowindow.open(map, currentLoc.marker);
+        intervalID = setTimeout(geoLocation, 5000);
       } else {
-      currentLoc = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
-      currentLoc.infowindow.open(map, currentLoc.marker);
+
+        currentLoc = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
+        currentLoc.infowindow.open(map, currentLoc.marker);
+        intervalID = setTimeout(geoLocation, 5000);
       }
 
       google.maps.event.addListener(currentLoc.infowindow, 'closeclick', function() {
+        map.setZoom(3);
         currentLoc.marker.setVisible(false);
+        stopTimer();
       });
     });
-
+      return currentLoc;
   } else {
     alert('Geolocation is not supported in your browser');
-  } 
+  }
 }
 
 // START of the constructor and methods ===
@@ -146,6 +156,7 @@ function Marker(marker, infowindow) {
 function fillNewForm(pos){
   var templateForm = document.getElementById('form_canvas').innerHTML;
   var formDiv = document.createElement('div');
+  formDiv.id = 'form_div';
   formDiv.innerHTML = templateForm;
   formDiv.childNodes[1].lat.value = pos.lat();
   formDiv.childNodes[1].lng.value = pos.lng();
