@@ -9,8 +9,8 @@ var intervalID;
 function initialize() {
 
   var mapOptions = {
-    zoom: 3,
-    center: new google.maps.LatLng(44.618126, 33.540518)
+    center: new google.maps.LatLng(55.776573, 37.617187),
+    zoom: 5,
   };
   
   map = new google.maps.Map(document.getElementById('map_canvas'),
@@ -34,20 +34,24 @@ function drawSavedPoints(){
     point.description = points[i].description;
     point.gas_station = points[i].gas_station;
   }
+  map.setCenter(point.marker.getPosition());
+  return points;
 }
 
 function addNewPoint() {
+  if (currentLoc) {
+    currentLoc.close();
+    stopTimer();
+  }
+
   chosen = false;
   map.setOptions({draggableCursor:'crosshair'});
   google.maps.event.addListener(map, 'click', function(event) {
     if (!chosen) {
       var pos = event.latLng;
       if (newPoint) {
-        newPoint.infowindow.close();
+        newPoint.refresh();
         newPoint.marker.setPosition(pos);
-        newPoint.marker.setVisible(true);
-        newPoint.infowindow = addInfoWindow(fillNewForm(pos));
-        newPoint.infowindow.open(map, newPoint.marker);
         chosen = true;
       } else {
       newPoint = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
@@ -90,18 +94,17 @@ function stopTimer(){
 function geoLocation(){
  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
+      if (newPoint){
+      newPoint.close();
+      }
+
       var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
 
       map.setCenter(pos);
-      map.setZoom(12);
 
       if (currentLoc) {
-        currentLoc.infowindow.close();
-        currentLoc.marker.setPosition(pos);
-        currentLoc.marker.setVisible(true);
-        currentLoc.infowindow = addInfoWindow(fillNewForm(pos));
-        currentLoc.infowindow.open(map, currentLoc.marker);
+        currentLoc.refresh();
         intervalID = setTimeout(geoLocation, 5000);
       } else {
 
@@ -111,7 +114,6 @@ function geoLocation(){
       }
 
       google.maps.event.addListener(currentLoc.infowindow, 'closeclick', function() {
-        map.setZoom(3);
         currentLoc.marker.setVisible(false);
         stopTimer();
       });
@@ -142,7 +144,19 @@ function addInfoWindow(message) {
 
 function Marker(marker, infowindow) {
   this.marker = marker;
+  this.pos = marker.getPosition();
   this.infowindow = infowindow;
+  this.refresh = function() {
+    this.infowindow.close();
+    this.marker.setPosition(this.pos);
+    this.marker.setVisible(true);
+    this.infowindow = addInfoWindow(fillNewForm(this.pos));
+    this.infowindow.open(map, this.marker);
+  };
+  this.close = function() {
+    this.infowindow.close();
+    this.marker.setVisible(false);
+  };
 
   google.maps.event.addListener(marker, 'click', function() {
     infowindow.open(map, marker);
@@ -187,7 +201,6 @@ function postToMongo(){
     request.setRequestHeader('Content-type', 'application/json');
     request.send(JSON.stringify(data));
     var response = JSON.parse(request.responseText);
-    console.log(response);
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
