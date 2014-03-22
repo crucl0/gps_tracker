@@ -88,7 +88,19 @@ function addNewPoint() {
 }
 
 function stopTimer(){
-  clearTimeout(intervalID);
+  clearInterval(intervalID);
+}
+
+function relocate(){
+  navigator.geolocation.getCurrentPosition(function(position) {
+    var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+   
+    currentLoc.marker.setPosition(pos);
+    document.getElementById('lat').value = pos.lat();
+    document.getElementById('lng').value = pos.lng();
+  }); 
+  console.log('tik-tak');
 }
 
 function geoLocation(){
@@ -105,12 +117,12 @@ function geoLocation(){
 
       if (currentLoc) {
         currentLoc.refresh();
-        intervalID = setTimeout(geoLocation, 5000);
+        intervalID = setInterval(relocate, 5000);
       } else {
 
         currentLoc = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
         currentLoc.infowindow.open(map, currentLoc.marker);
-        intervalID = setTimeout(geoLocation, 5000);
+        intervalID = setInterval(relocate, 5000);
       }
 
       google.maps.event.addListener(currentLoc.infowindow, 'closeclick', function() {
