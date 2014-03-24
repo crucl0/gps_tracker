@@ -19,7 +19,7 @@ function initialize() {
   drawSavedPoints();
 }
 
-function drawSavedPoints(){
+function drawSavedPoints() {
   var points = getFromMongo('/points');
   for (var i=0; points[i]; i++) {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
@@ -87,11 +87,11 @@ function addNewPoint() {
   });
 }
 
-function stopTimer(){
+function stopTimer() {
   clearInterval(intervalID);
 }
 
-function relocate(){
+function relocate() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
@@ -99,11 +99,10 @@ function relocate(){
     currentLoc.marker.setPosition(pos);
     document.getElementById('lat').value = pos.lat();
     document.getElementById('lng').value = pos.lng();
-  }); 
-  console.log('tik-tak');
+  });
 }
 
-function geoLocation(){
+function geoLocation() {
  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
       if (newPoint){
@@ -179,7 +178,7 @@ function Marker(marker, infowindow) {
 
 // END of the constructor and methods ===
 
-function fillNewForm(pos){
+function fillNewForm(pos) {
   var templateForm = document.getElementById('form_canvas').innerHTML;
   var formDiv = document.createElement('div');
   formDiv.id = 'form_div';
@@ -189,7 +188,7 @@ function fillNewForm(pos){
   return formDiv;
 }
 
-function getFromMongo(url){
+function getFromMongo(url) {
     var request = null;
     request = new XMLHttpRequest();
     request.open('GET', url, false);
@@ -199,7 +198,7 @@ function getFromMongo(url){
     return response;
 }
 
-function postToMongo(){
+function postToMongo() {
     var data = {
         lat: document.getElementById('lat').value,
         lng: document.getElementById('lng').value,
@@ -212,7 +211,23 @@ function postToMongo(){
     request.open('POST', '/points', false);
     request.setRequestHeader('Content-type', 'application/json');
     request.send(JSON.stringify(data));
+
     var response = JSON.parse(request.responseText);
+    var pos = new google.maps.LatLng(response.lat, response.lng);
+    var info = '<div id="justNew"><h1>' + response.gas_station + '</h1>' +
+        response.description + '<br>' +
+        '<a href=/points/'+ response._id + '>details</a></div>';
+
+    if (newPoint) {
+      newPoint.close();
+    } else if (currentLoc) {
+      currentLoc.close();
+    }
+    var point = new Marker(addMarker(pos), addInfoWindow(info));
+    point.marker.setTitle = response.gas_station;
+    point.infowindow.open(map, point.marker);
+
+    return point;
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);

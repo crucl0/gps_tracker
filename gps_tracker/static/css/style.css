@@ -66,3 +66,22 @@ button.btn {
 #fromDB {
   width: 200px;
 }
+
+span.postButton {
+  background: #D7F0D7;
+  border: 1px solid #AECFAE;
+  border-radius: 3px;
+  color: #333;
+  padding: 1px;
+  text-align: center;
+  font-size: 25px;
+  text-shadow: 0 1px 0 #ccc;
+  width: 50px; }
+  span.postButton:hover {
+    background: #AECFAE;
+    cursor: pointer; }
+  span.postButton:active {
+    background: #80B280;
+    box-shadow: inset 0 0 1px 1px #e3e3e3;
+    color: #000; 
+}
