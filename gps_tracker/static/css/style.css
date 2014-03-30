@@ -65,6 +65,8 @@ button.btn {
 
 #fromDB {
   width: 200px;
+  word-wrap: break-word;
+  min-height: 150px;
 }
 
 span.postButton {
@@ -82,6 +84,26 @@ span.postButton {
     cursor: pointer; }
   span.postButton:active {
     background: #80B280;
+    box-shadow: inset 0 0 1px 1px #e3e3e3;
+    color: #000; 
+}
+
+span.delButton {
+  position: absolute;
+  bottom: 5px;
+  background: #ffd6d6;
+  border-radius: 3px;
+  color: #333;
+  padding: 1px;
+  text-align: center;
+  font-size: 25px;
+  width: auto;
+  height: auto; }
+  span.delButton:hover {
+    background: #ff8585;
+    cursor: pointer; }
+  span.delButton:active {
+    background: #ff8080;
     box-shadow: inset 0 0 1px 1px #e3e3e3;
     color: #000; 
 }

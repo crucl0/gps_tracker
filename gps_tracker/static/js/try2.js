@@ -3,8 +3,10 @@
 var map;
 var currentLoc;
 var newPoint;
+var point;
 var chosen;
 var intervalID;
+var markersPool = [];
 
 function initialize() {
 
@@ -32,7 +34,7 @@ function drawSavedPoints() {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
     var info = '<div id="fromDB"><h1>' + points[i].gas_station + '</h1>' +
         points[i].description + '<br>' +
-        '<a href=/points/'+ points[i]._id + '>details</a></div>';
+'<span class="delButton" onclick=deleteFromMongo("'+points[i]._id+'")>Delete this point</span>';
         
     var point = new Marker(addMarker(tmpLatLng), addInfoWindow(info));
     point.marker.setTitle(points[i].gas_station);
@@ -40,9 +42,9 @@ function drawSavedPoints() {
     point.id = points[i]._id;
     point.description = points[i].description;
     point.gas_station = points[i].gas_station;
+    markersPool.push(point);
   }
   map.setCenter(point.marker.getPosition());
-  return points;
   }
 }
 
@@ -57,7 +59,7 @@ function addNewPoint() {
   google.maps.event.addListener(map, 'click', function(event) {
     if (!chosen) {
       var pos = event.latLng;
-      if (newPoint) {
+      if (newPoint && !newPoint.added) {
         newPoint.refresh();
         newPoint.marker.setPosition(pos);
         chosen = true;
@@ -65,6 +67,7 @@ function addNewPoint() {
       newPoint = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
       newPoint.infowindow.open(map, newPoint.marker);
       newPoint.marker.setDraggable(true);
+      newPoint.added = true;
       map.setOptions({draggableCursor: null});
       chosen = true;
       }
@@ -72,6 +75,7 @@ function addNewPoint() {
     google.maps.event.addListener(newPoint.infowindow, 'closeclick', function() {
       newPoint.marker.setVisible(false);
       map.setOptions({draggableCursor: null});
+      // chosen = true;
     });
 
     google.maps.event.addListener(newPoint.marker, 'dragstart', function() {
@@ -93,6 +97,7 @@ function addNewPoint() {
 
     }
   });
+// return newPoint;
 }
 
 function stopTimer() {
@@ -221,21 +226,42 @@ function postToMongo() {
     request.send(JSON.stringify(data));
 
     var response = JSON.parse(request.responseText);
+
     var pos = new google.maps.LatLng(response.lat, response.lng);
-    var info = '<div id="justNew"><h1>' + response.gas_station + '</h1>' +
+    var info = '<div id="fromDB"><h1>' + response.gas_station + '</h1>' +
         response.description + '<br>' +
-        '<a href=/points/'+ response._id + '>details</a></div>';
+        '<br><span class="delButton" onclick=deleteFromMongo("'+response._id+'")>Delete this point</span>'+
+        '</div>';
 
     if (newPoint) {
       newPoint.close();
     } else if (currentLoc) {
       currentLoc.close();
     }
-    var point = new Marker(addMarker(pos), addInfoWindow(info));
+    point = new Marker(addMarker(pos), addInfoWindow(info));
     point.marker.setTitle = response.gas_station;
     point.infowindow.open(map, point.marker);
-
+    point.id = response._id;
+    markersPool.push(point);
     return point;
 }
 
+
+function deleteFromMongo(id) {
+  var request = null;
+  var pointToDelete = {'id': id};
+  var url = '/points/' + id;
+  request = new XMLHttpRequest();
+  request.open('DELETE', url, false);
+  request.setRequestHeader('Content-type', 'application/json');
+  request.send(JSON.stringify(pointToDelete));
+
+  for (var i=0; markersPool[i]; i++) {
+    if (markersPool[i].id == id) {
+      markersPool[i].close();
+    }
+
+  }
+
+}
 google.maps.event.addDomListener(window, 'load', initialize);
