@@ -9,18 +9,25 @@ var intervalID;
 function initialize() {
 
   var mapOptions = {
-    center: new google.maps.LatLng(55.776573, 37.617187),
-    zoom: 5,
+    zoom: 12,
   };
   
   map = new google.maps.Map(document.getElementById('map_canvas'),
       mapOptions);
-
-  drawSavedPoints();
+  
+  drawSavedPoints(); 
 }
+
 
 function drawSavedPoints() {
   var points = getFromMongo('/points');
+  if (points == 0) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+      map.setCenter(pos);
+    });
+  } else {
   for (var i=0; points[i]; i++) {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
     var info = '<div id="fromDB"><h1>' + points[i].gas_station + '</h1>' +
@@ -36,6 +43,7 @@ function drawSavedPoints() {
   }
   map.setCenter(point.marker.getPosition());
   return points;
+  }
 }
 
 function addNewPoint() {
