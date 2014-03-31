@@ -49,17 +49,17 @@
 
             <div> 
                 <label>Gas station<br>
-                <input id="gas_station" name="gas_station" type="text" required=""> 
+                <input id="gas_station" name="gas_station" type="text" required="" maxlength="25"> 
                 </label> 
             </div>
 
             <div> 
                 <label for="description">Description:<br> 
-                <textarea id="description" name="description" rows="5" required=""></textarea>
+                <textarea id="description" name="description" rows="5" required="" maxlength="140"></textarea>
                 </label> 
             </div> 
             <div>
-                <span class="postButton" onclick="postToMongo()">Add this point to DataBase</span>
+                <span id="pButton" class="postButton" onclick="postToMongo()">Save the point</span>
             </div>
           </fieldset>
     </form>

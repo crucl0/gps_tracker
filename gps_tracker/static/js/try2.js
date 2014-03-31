@@ -4,6 +4,8 @@ var map;
 var currentLoc;
 var newPoint;
 var point;
+var editMarker;
+var refillMarker;
 var chosen;
 var intervalID;
 var markersPool = [];
@@ -21,9 +23,11 @@ function initialize() {
 }
 
 
+// ==========================================
+// START of the block with commands to Points
 function drawSavedPoints() {
   var points = getFromMongo('/points');
-  if (points == 0) {
+  if (points === 0) {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
@@ -32,9 +36,13 @@ function drawSavedPoints() {
   } else {
   for (var i=0; points[i]; i++) {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
-    var info = '<div id="fromDB"><h1>' + points[i].gas_station + '</h1>' +
-        points[i].description + '<br>' +
-'<span class="delButton" onclick=deleteFromMongo("'+points[i]._id+'")>Delete this point</span>';
+    var info = '<div id="fromDB">'+
+    '<div id="header">' + points[i].gas_station + '&nbsp;' + 
+        '<span title="Edit this point" id="editPen" onclick=editPoint("'+points[i]._id+'")>✎</span></div>' +
+    '<div id="infoBody">' + points[i].description + '</div>' +
+    '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+points[i]._id+'")'+
+        '>✂</span></div>'+
+    '</div>';
         
     var point = new Marker(addMarker(tmpLatLng), addInfoWindow(info));
     point.marker.setTitle(points[i].gas_station);
@@ -52,6 +60,8 @@ function addNewPoint() {
   if (currentLoc) {
     currentLoc.close();
     stopTimer();
+  } else if (editMarker){
+    editMarker.infowindow.close();
   }
 
   chosen = false;
@@ -75,7 +85,6 @@ function addNewPoint() {
     google.maps.event.addListener(newPoint.infowindow, 'closeclick', function() {
       newPoint.marker.setVisible(false);
       map.setOptions({draggableCursor: null});
-      // chosen = true;
     });
 
     google.maps.event.addListener(newPoint.marker, 'dragstart', function() {
@@ -97,7 +106,47 @@ function addNewPoint() {
 
     }
   });
-// return newPoint;
+}
+
+function editPoint(id) {
+  if (refillMarker) {
+    refillMarker.infowindow.close();
+  }
+  for (var i=0; markersPool[i]; i++) {
+    if (markersPool[i].id == id) {
+      editMarker = markersPool[i];
+      editMarker.infowindow.close();
+      markersPool.splice(i, 1);
+    }
+  }
+
+  var editForm = fillNewForm(editMarker.marker.getPosition());
+  editForm.childNodes[1].gas_station.value = editMarker.gas_station;
+  editForm.childNodes[1].description.value = editMarker.description;
+
+  editMarker.infowindow = addInfoWindow(editForm);
+  editMarker.infowindow.open(map, editMarker.marker);
+
+
+  document.getElementById('pButton').onclick = function() {
+    editMarker.gas_station = editForm.childNodes[1].gas_station.value;
+    editMarker.description = editForm.childNodes[1].description.value;
+    editMarker.close();
+
+    var response = putIntoMongo(editMarker);
+    var info = '<div id="fromDB">'+
+      '<div id="header">' + response.gas_station + '&nbsp;' + 
+        '<span title="Edit this point" id="editPen" onclick=editPoint("'+response._id+'")>✎</span></div> ' +
+      '<div id="infoBody">'+ response.description + '</div>' +
+      '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+response._id+'")>'+
+        '✂</span></div>'+
+      '</div>';
+
+    var pos = new google.maps.LatLng(response.lat, response.lng);
+    refillMarker = new Marker(addMarker(pos), addInfoWindow(info));
+    refillMarker.infowindow.open(map, refillMarker.marker);
+    markersPool.push(refillMarker);
+  };
 }
 
 function stopTimer() {
@@ -134,6 +183,7 @@ function geoLocation() {
 
         currentLoc = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
         currentLoc.infowindow.open(map, currentLoc.marker);
+        currentLoc.added = true;
         intervalID = setInterval(relocate, 5000);
       }
 
@@ -148,24 +198,13 @@ function geoLocation() {
   }
 }
 
-// START of the constructor and methods ===
+// END of the block with commands to Points
+// ========================================
 
-function addMarker(position) {
-  var newMarker = new google.maps.Marker({
-    position: position,
-    map: map
-  });
 
-  return newMarker;
-}
 
-function addInfoWindow(message) {
-  var newInfoWindow = new google.maps.InfoWindow({
-    content: message
-  });
-  return newInfoWindow;
-}
-
+// ====================================
+// START of the constructor and methods
 function Marker(marker, infowindow) {
   this.marker = marker;
   this.pos = marker.getPosition();
@@ -189,7 +228,21 @@ function Marker(marker, infowindow) {
   return this;
 }
 
-// END of the constructor and methods ===
+function addMarker(position) {
+  var newMarker = new google.maps.Marker({
+    position: position,
+    map: map
+  });
+
+  return newMarker;
+}
+
+function addInfoWindow(message) {
+  var newInfoWindow = new google.maps.InfoWindow({
+    content: message
+  });
+  return newInfoWindow;
+}
 
 function fillNewForm(pos) {
   var templateForm = document.getElementById('form_canvas').innerHTML;
@@ -201,6 +254,13 @@ function fillNewForm(pos) {
   return formDiv;
 }
 
+// END of the constructor and methods
+// ==================================
+
+
+
+//==========================================
+// START of the block with commands to MongoDB
 function getFromMongo(url) {
     var request = null;
     request = new XMLHttpRequest();
@@ -228,20 +288,25 @@ function postToMongo() {
     var response = JSON.parse(request.responseText);
 
     var pos = new google.maps.LatLng(response.lat, response.lng);
-    var info = '<div id="fromDB"><h1>' + response.gas_station + '</h1>' +
-        response.description + '<br>' +
-        '<br><span class="delButton" onclick=deleteFromMongo("'+response._id+'")>Delete this point</span>'+
-        '</div>';
+    var info = '<div id="fromDB">'+
+      '<div id="header">' + response.gas_station + '&nbsp;' + 
+        '<span title="Edit this point" id="editPen" onclick=editPoint("'+response._id+'")>✎</span></div> ' +
+      '<div id="infoBody">'+ response.description + '</div>' +
+      '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+response._id+'")>'+
+        '✂</span></div>'+
+      '</div>';
 
     if (newPoint) {
       newPoint.close();
     } else if (currentLoc) {
       currentLoc.close();
-    }
+    } 
     point = new Marker(addMarker(pos), addInfoWindow(info));
     point.marker.setTitle = response.gas_station;
     point.infowindow.open(map, point.marker);
     point.id = response._id;
+    point.description = response.description;
+    point.gas_station = response.gas_station;
     markersPool.push(point);
     return point;
 }
@@ -262,6 +327,30 @@ function deleteFromMongo(id) {
     }
 
   }
-
 }
+
+
+function putIntoMongo(editMarker){
+  var request = null;
+  var pointToEdit = {
+    id: editMarker.id,
+    lat: editMarker.marker.getPosition().lat(),
+    lng: editMarker.marker.getPosition().lng(),
+    gas_station: editMarker.gas_station,
+    description: editMarker.description
+  };
+
+  var url = '/points/' + editMarker.id;
+  request = new XMLHttpRequest();
+  request.open('PUT', url, false);
+  request.setRequestHeader('Content-type', 'application/json');
+  request.send(JSON.stringify(pointToEdit));
+
+  var response = JSON.parse(request.responseText);
+  return response;
+}
+
+// END of the block with commands to MongoDB
+// =======================================
+
 google.maps.event.addDomListener(window, 'load', initialize);

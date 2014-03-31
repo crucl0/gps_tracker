@@ -64,9 +64,35 @@ button.btn {
 }
 
 #fromDB {
-  width: 200px;
-  word-wrap: break-word;
-  min-height: 150px;
+  max-width: 250px;
+  height: 100%;
+  margin-bottom: 5px;
+}
+
+#fromDB>#header {
+  font-family: sans-serif;
+  font-weight: bolder;
+  font-size: 20px;
+  padding-bottom: 5px;
+}
+
+#fromDB>#infoBody {
+  font-size: 15px;
+  height: 100%;
+  margin-bottom: 10px; 
+}
+
+#fromDB>#dButton {
+  width: 100%;
+}
+
+#editPen {
+  font-size: 23px;
+  color: #80B280;
+}
+#editPen:hover {
+  color: #ff8080;
+  cursor: pointer;
 }
 
 span.postButton {
@@ -78,7 +104,7 @@ span.postButton {
   text-align: center;
   font-size: 25px;
   text-shadow: 0 1px 0 #ccc;
-  width: 50px; }
+  /*width: 50px;*/ }
   span.postButton:hover {
     background: #AECFAE;
     cursor: pointer; }
@@ -89,14 +115,12 @@ span.postButton {
 }
 
 span.delButton {
-  position: absolute;
-  bottom: 5px;
   background: #ffd6d6;
   border-radius: 3px;
-  color: #333;
+  color: #222;
   padding: 1px;
   text-align: center;
-  font-size: 25px;
+  font-size: 20px;
   width: auto;
   height: auto; }
   span.delButton:hover {
