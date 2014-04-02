@@ -1,12 +1,12 @@
 'use strict';
 
 var map;
-var currentLoc;
-var newPoint;
+// var currentLoc;
+// var newPoint;
 var point;
-var editMarker;
-var refillMarker;
-var chosen;
+// var editMarker;
+// var refillMarker;
+// var chosen;
 var intervalID;
 var markersPool = [];
 
@@ -27,6 +27,7 @@ function initialize() {
 // START of the block with commands to Points
 function drawSavedPoints() {
   var points = getFromMongo('/points');
+
   if (points === 0) {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = new google.maps.LatLng(position.coords.latitude,
@@ -34,7 +35,7 @@ function drawSavedPoints() {
       map.setCenter(pos);
     });
   } else {
-  for (var i=0; points[i]; i++) {
+  for (var i=0; i<points.length; i++) {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
     var info = fillWhatExists(points[i]);
         
@@ -44,6 +45,7 @@ function drawSavedPoints() {
     point.id = points[i]._id;
     point.description = points[i].description;
     point.gas_station = points[i].gas_station;
+    point.fromDB = true;
     markersPool.push(point);
   }
   map.setCenter(point.marker.getPosition());
@@ -102,88 +104,110 @@ function addNewPoint() {
   });
 }
 
-function editPoint(id) {
-  if (refillMarker) {
-    refillMarker.infowindow.close();
-  }
-  for (var i=0; markersPool[i]; i++) {
-    if (markersPool[i].id == id) {
-      editMarker = markersPool[i];
-      editMarker.infowindow.close();
-      markersPool.splice(i, 1);
-    }
-  }
+// function editPoint(id) {
+//   if (refillMarker) {
+//     refillMarker.infowindow.close();
+//   }
+//   for (var i=0; markersPool[i]; i++) {
+//     if (markersPool[i].id == id) {
+//       editMarker = markersPool[i];
+//       editMarker.infowindow.close();
+//       markersPool.splice(i, 1);
+//     }
+//   }
 
-  var editForm = fillNewForm(editMarker.marker.getPosition());
-  editForm.childNodes[1].gas_station.value = editMarker.gas_station;
-  editForm.childNodes[1].description.value = editMarker.description;
+//   var editForm = fillNewForm(editMarker.marker.getPosition());
+//   editForm.childNodes[1].gas_station.value = editMarker.gas_station;
+//   editForm.childNodes[1].description.value = editMarker.description;
 
-  editMarker.infowindow = addInfoWindow(editForm);
-  editMarker.infowindow.open(map, editMarker.marker);
+//   editMarker.infowindow = addInfoWindow(editForm);
+//   editMarker.infowindow.open(map, editMarker.marker);
 
 
-  document.getElementById('pButton').onclick = function() {
-    editMarker.gas_station = editForm.childNodes[1].gas_station.value;
-    editMarker.description = editForm.childNodes[1].description.value;
-    editMarker.close();
+//   document.getElementById('pButton').onclick = function() {
+//     editMarker.gas_station = editForm.childNodes[1].gas_station.value;
+//     editMarker.description = editForm.childNodes[1].description.value;
+//     editMarker.close();
 
-    var response = putIntoMongo(editMarker);
-    var info = fillWhatExists(response);
+//     var response = putIntoMongo(editMarker);
+//     var info = fillWhatExists(response);
 
-    var pos = new google.maps.LatLng(response.lat, response.lng);
-    refillMarker = new Marker(addMarker(pos), addInfoWindow(info));
-    refillMarker.infowindow.open(map, refillMarker.marker);
-    markersPool.push(refillMarker);
-  };
-}
+//     var pos = new google.maps.LatLng(response.lat, response.lng);
+//     refillMarker = new Marker(addMarker(pos), addInfoWindow(info));
+//     refillMarker.infowindow.open(map, refillMarker.marker);
+//     markersPool.push(refillMarker);
+//   };
+// }
 
-function stopTimer() {
-  clearInterval(intervalID);
-}
 
 function relocate() {
   navigator.geolocation.getCurrentPosition(function(position) {
     var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
    
-    currentLoc.marker.setPosition(pos);
+    point.marker.setPosition(pos);
     document.getElementById('lat').value = pos.lat();
     document.getElementById('lng').value = pos.lng();
   });
 }
 
+function checkInPool(point, property, value) {
+  for (var i=0; i<markersPool.length; i++){
+    if (markersPool[i] == point) {
+      if (point.hasOwnProperty(property)){
+        if (point[property] == value) {
+          return true;
+        } else {
+          console.log('Such property was found but value did not match. ' + 
+            'Property «'+property+'» has the value «'+point[property]+'», not «'+value+'». Sory.');
+          return false;
+        }
+      } else {
+        console.log('This object did not have «'+property+'» property. Sory.');
+        return null;
+      }
+    }
+  }
+}
+
+
 function geoLocation() {
  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      if (newPoint){
-      newPoint.close();
-      }
 
+  var currentPos = navigator.geolocation.getCurrentPosition(
+    function(position) {
       var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
-
+      console.log(pos);
       map.setCenter(pos);
 
-      if (currentLoc) {
-        currentLoc.refresh();
-        intervalID = setInterval(relocate, 5000);
+      console.log('There are '+markersPool.length+' markers on the map');
+
+      if (checkInPool(point, 'fromDB', false) && checkInPool(point, 'current', true)) {
+        point.refresh();
       } else {
-
-        currentLoc = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
-        currentLoc.infowindow.open(map, currentLoc.marker);
-        currentLoc.added = true;
+        point = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
+        point.infowindow.open(map, point.marker);
+        point.current = true;
+        point.fromDB = false;
+        markersPool.push(point);
         intervalID = setInterval(relocate, 5000);
-      }
+        console.log('There are '+markersPool.length+' markers on the map');
 
-      google.maps.event.addListener(currentLoc.infowindow, 'closeclick', function() {
-        currentLoc.marker.setVisible(false);
-        stopTimer();
+      }
+      google.maps.event.addListener(point.infowindow, 'closeclick', function() {
+          point.marker.setVisible(false);
+          markersPool.splice(markersPool.indexOf(point), 1);
+          console.log('There are '+markersPool.length+' markers on the map');
+          clearInterval(intervalID);
       });
-    });
-      return currentLoc;
+    }
+  );
+  return point;
   } else {
     alert('Geolocation is not supported in your browser');
   }
+
 }
 
 // END of the block with commands to Points
@@ -246,14 +270,14 @@ function convertDate(inputFormat) {
   function pad(s) { return (s < 10) ? '0' + s : s; }
   var d = new Date(inputFormat);
   return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/') +
-          '&nbsp;&nbsp;<u>at</u>&nbsp;&nbsp;' + [d.getHours(), d.getMinutes()].join(':');
+          '&nbsp;&nbsp;<u>at</u>&nbsp;' + [d.getHours(), d.getMinutes()].join(':');
 }
 
 function fillWhatExists(source) {
   var info = '<div id="fromDB">'+
       '<div id="header">' + source.gas_station + '&nbsp;' + 
         '<span title="Edit this point" id="editPen" onclick=editPoint("'+source._id+'")>✎</span></div> ' +
-      '<div id="date"><span id="time">⌚&nbsp;&nbsp;</span>' + convertDate(source.date) + '</div>' +     
+      '<div id="date"><span id="time">⌚&nbsp;</span>' + convertDate(source.date) + '</div>' +     
       '<div id="infoBody">'+ source.description + '</div>' +
       '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+source._id+'")>'+
         '✂</span></div>'+
