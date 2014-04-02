@@ -272,11 +272,13 @@ function getFromMongo(url) {
 }
 
 function postToMongo() {
+  var now = new Date();
     var data = {
         lat: document.getElementById('lat').value,
         lng: document.getElementById('lng').value,
         gas_station: document.getElementById('gas_station').value,
-        description: document.getElementById('description').value
+        description: document.getElementById('description').value,
+        date: now
     };
 
     var request = new XMLHttpRequest();
@@ -333,7 +335,7 @@ function deleteFromMongo(id) {
 function putIntoMongo(editMarker){
   var request = null;
   var pointToEdit = {
-    id: editMarker.id,
+    _id: editMarker.id,
     lat: editMarker.marker.getPosition().lat(),
     lng: editMarker.marker.getPosition().lng(),
     gas_station: editMarker.gas_station,
