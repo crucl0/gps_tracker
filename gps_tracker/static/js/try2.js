@@ -37,14 +37,6 @@ function drawSavedPoints() {
   for (var i=0; points[i]; i++) {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
     var info = fillWhatExists(points[i]);
-    // var info = '<div id="fromDB">'+
-    // '<div id="header">' + points[i].gas_station + '&nbsp;' + 
-    //     '<span title="Edit this point" id="editPen" onclick=editPoint("'+points[i]._id+'")>✎</span></div>' +
-    // '<div id="date">' + points[i].date + '</div>' +
-    // '<div id="infoBody">' + points[i].description + '</div>' +
-    // '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+points[i]._id+'")'+
-    //     '>✂</span></div>'+
-    // '</div>';
         
     var point = new Marker(addMarker(tmpLatLng), addInfoWindow(info));
     point.marker.setTitle(points[i].gas_station);
@@ -137,14 +129,6 @@ function editPoint(id) {
 
     var response = putIntoMongo(editMarker);
     var info = fillWhatExists(response);
-    // var info = '<div id="fromDB">'+
-    //   '<div id="header">' + response.gas_station + '&nbsp;' + 
-    //     '<span title="Edit this point" id="editPen" onclick=editPoint("'+response._id+'")>✎</span></div> ' +
-    //   '<div id="date">' + response.date + '</div>' +
-    //   '<div id="infoBody">'+ response.description + '</div>' +
-    //   '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+response._id+'")>'+
-    //     '✂</span></div>'+
-    //   '</div>';
 
     var pos = new google.maps.LatLng(response.lat, response.lng);
     refillMarker = new Marker(addMarker(pos), addInfoWindow(info));
@@ -315,14 +299,6 @@ function postToMongo() {
 
     var pos = new google.maps.LatLng(response.lat, response.lng);
     var info = fillWhatExists(response);
-    // var info = '<div id="fromDB">'+
-    //   '<div id="header">' + response.gas_station + '&nbsp;' + 
-    //     '<span title="Edit this point" id="editPen" onclick=editPoint("'+response._id+'")>✎</span></div> ' +
-    //   '<div id="date">⌚ ' + convertDate(response.date) + '</div>' +     
-    //   '<div id="infoBody">'+ response.description + '</div>' +
-    //   '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+response._id+'")>'+
-    //     '✂</span></div>'+
-    //   '</div>';
 
     if (newPoint) {
       newPoint.close();
