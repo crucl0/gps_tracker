@@ -1,11 +1,7 @@
 'use strict';
 
 var map;
-// var currentLoc;
-// var newPoint;
 var point;
-// var editMarker;
-// var refillMarker;
 var chosen;
 var intervalID;
 var markersPool = [];
@@ -100,40 +96,49 @@ function addNewPoint() {
   });
 }
 
-// function editPoint(id) {
-//   if (refillMarker) {
-//     refillMarker.infowindow.close();
-//   }
-//   for (var i=0; markersPool[i]; i++) {
-//     if (markersPool[i].id == id) {
-//       editMarker = markersPool[i];
-//       editMarker.infowindow.close();
-//       markersPool.splice(i, 1);
-//     }
-//   }
+function editPoint(id) {
+  var ind;
+  var editMarker;
+  var origin_info;
 
-//   var editForm = fillNewForm(editMarker.marker.getPosition());
-//   editForm.childNodes[1].gas_station.value = editMarker.gas_station;
-//   editForm.childNodes[1].description.value = editMarker.description;
+  for (var i=0; i<markersPool.length; i++) {
+    if (markersPool[i].id == id) {
+      ind = i;
+      markersPool[i].infowindow.close();
+      editMarker = markersPool[i];
+      origin_info = markersPool[i].infowindow;
+    }
+  }
 
-//   editMarker.infowindow = addInfoWindow(editForm);
-//   editMarker.infowindow.open(map, editMarker.marker);
+  var editForm = fillNewForm(editMarker.marker.getPosition());
+  editForm.childNodes[1].gas_station.value = editMarker.gas_station;
+  editForm.childNodes[1].description.value = editMarker.description;
 
+  editMarker.infowindow = addInfoWindow(editForm);
+  editMarker.infowindow.open(map, editMarker.marker);
 
-//   document.getElementById('pButton').onclick = function() {
-//     editMarker.gas_station = editForm.childNodes[1].gas_station.value;
-//     editMarker.description = editForm.childNodes[1].description.value;
-//     editMarker.close();
+  document.getElementById('pButton').onclick = function() {
+    editMarker.gas_station = document.getElementById('gas_station').value;
+    editMarker.description = document.getElementById('description').value;
+    editMarker.close();
+       
+    var response = putIntoMongo(editMarker);
+    var info = fillWhatExists(response);
+    var pos = new google.maps.LatLng(response.lat, response.lng);
 
-//     var response = putIntoMongo(editMarker);
-//     var info = fillWhatExists(response);
+    editMarker = new Marker(addMarker(pos), addInfoWindow(info));
+    editMarker.id = response._id;
+    editMarker.gas_station = response.gas_station;
+    editMarker.description = response.description;
+    editMarker.infowindow.open(map, editMarker.marker);
+    editMarker.fromDB = true;
+    markersPool[ind] = editMarker;    
+  };
 
-//     var pos = new google.maps.LatLng(response.lat, response.lng);
-//     refillMarker = new Marker(addMarker(pos), addInfoWindow(info));
-//     refillMarker.infowindow.open(map, refillMarker.marker);
-//     markersPool.push(refillMarker);
-//   };
-// }
+  google.maps.event.addListener(editMarker.infowindow, 'closeclick', function() {
+    editMarker.infowindow = origin_info;
+      });
+}
 
 
 function relocate() {
@@ -145,7 +150,6 @@ function relocate() {
     document.getElementById('lat').value = pos.lat();
     document.getElementById('lng').value = pos.lng();
   });
-  console.log('tik');
 }
 
 function checkInPool(point, property, value) {
@@ -161,7 +165,7 @@ function checkInPool(point, property, value) {
         }
       } else {
         console.log('This object did not have «'+property+'» property. Sory.');
-        return null;
+        return undefined;
       }
     }
   }
@@ -225,6 +229,9 @@ function Marker(marker, infowindow) {
   this.marker = marker;
   this.pos = marker.getPosition();
   this.infowindow = infowindow;
+  this.editing = false;
+  this.fromDB = false;
+  this.manual = false;
   this.refresh = function() {
     this.infowindow.close();
     this.marker.setPosition(this.pos);
@@ -324,15 +331,14 @@ function postToMongo() {
     request.send(JSON.stringify(data));
 
     var response = JSON.parse(request.responseText);
-
     var pos = new google.maps.LatLng(response.lat, response.lng);
     var info = fillWhatExists(response);
 
-    if (newPoint) {
-      newPoint.close();
-    } else if (currentLoc) {
-      currentLoc.close();
-    } 
+    if (checkInPool(point, 'current', true) || (checkInPool(point, 'manual', true))){
+      point.close();
+      markersPool.splice(markersPool.indexOf(point), 1);
+      point = null;
+    }
     point = new Marker(addMarker(pos), addInfoWindow(info));
     point.marker.setTitle = response.gas_station;
     point.infowindow.open(map, point.marker);
@@ -356,6 +362,7 @@ function deleteFromMongo(id) {
   for (var i=0; markersPool[i]; i++) {
     if (markersPool[i].id == id) {
       markersPool[i].close();
+      markersPool.splice(markersPool.indexOf(markersPool[i]), 1);
     }
 
   }
