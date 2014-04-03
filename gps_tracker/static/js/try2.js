@@ -6,7 +6,7 @@ var map;
 var point;
 // var editMarker;
 // var refillMarker;
-// var chosen;
+var chosen;
 var intervalID;
 var markersPool = [];
 
@@ -52,54 +52,50 @@ function drawSavedPoints() {
   }
 }
 
-function addNewPoint() {
-  if (currentLoc) {
-    currentLoc.close();
-    stopTimer();
-  } else if (editMarker){
-    editMarker.infowindow.close();
-  }
 
+function addNewPoint() {
+  if (checkInPool(point, 'current', true) || (checkInPool(point, 'manual', true))) {
+    clearInterval(intervalID);
+    point.close();
+    markersPool.splice(markersPool.indexOf(point), 1);
+    point = null;
+  } 
   chosen = false;
   map.setOptions({draggableCursor:'crosshair'});
   google.maps.event.addListener(map, 'click', function(event) {
     if (!chosen) {
       var pos = event.latLng;
-      if (newPoint && !newPoint.added) {
-        newPoint.refresh();
-        newPoint.marker.setPosition(pos);
-        chosen = true;
-      } else {
-      newPoint = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
-      newPoint.infowindow.open(map, newPoint.marker);
-      newPoint.marker.setDraggable(true);
-      newPoint.added = true;
+  
+      point = new Marker(addMarker(pos), addInfoWindow(fillNewForm(pos)));
+      point.infowindow.open(map, point.marker);
+      point.marker.setDraggable(true);
+      point.fromDB = false;
+      point.manual = true;
       map.setOptions({draggableCursor: null});
       chosen = true;
-      }
+      markersPool.push(point);
 
-    google.maps.event.addListener(newPoint.infowindow, 'closeclick', function() {
-      newPoint.marker.setVisible(false);
-      map.setOptions({draggableCursor: null});
-    });
-
-    google.maps.event.addListener(newPoint.marker, 'dragstart', function() {
-      newPoint.infowindow.close();
-    });
-
-    google.maps.event.addListener(newPoint.marker, 'dragend', function(event) {
-      var pos = event.latLng;
-      newPoint.infowindow.close();
-      newPoint.infowindow = addInfoWindow(fillNewForm(pos));
-      newPoint.infowindow.open(map, newPoint.marker);
-      map.setOptions({draggableCursor: null});
-
-      google.maps.event.addListener(newPoint.infowindow, 'closeclick', function() {
-        newPoint.marker.setVisible(false);
+      google.maps.event.addListener(point.infowindow, 'closeclick', function() {
+        point.marker.setVisible(false);
         map.setOptions({draggableCursor: null});
       });
-    });
 
+      google.maps.event.addListener(point.marker, 'dragstart', function() {
+        point.infowindow.close();
+      });
+
+      google.maps.event.addListener(point.marker, 'dragend', function(event) {
+        var pos = event.latLng;
+        point.infowindow.close();
+        point.infowindow = addInfoWindow(fillNewForm(pos));
+        point.infowindow.open(map, point.marker);
+        map.setOptions({draggableCursor: null});
+
+        google.maps.event.addListener(point.infowindow, 'closeclick', function() {
+          point.marker.setVisible(false);
+          map.setOptions({draggableCursor: null});
+        });
+      });
     }
   });
 }
@@ -149,6 +145,7 @@ function relocate() {
     document.getElementById('lat').value = pos.lat();
     document.getElementById('lng').value = pos.lng();
   });
+  console.log('tik');
 }
 
 function checkInPool(point, property, value) {
@@ -172,6 +169,11 @@ function checkInPool(point, property, value) {
 
 
 function geoLocation() {
+  if (checkInPool(point, 'manual', true)){
+    point.close();
+    markersPool.splice(markersPool.indexOf(point), 1);
+    point = null;
+  }
  if (navigator.geolocation) {
 
   var currentPos = navigator.geolocation.getCurrentPosition(
@@ -182,6 +184,8 @@ function geoLocation() {
       map.setCenter(pos);
 
       console.log('There are '+markersPool.length+' markers on the map');
+
+
 
       if (checkInPool(point, 'fromDB', false) && checkInPool(point, 'current', true)) {
         point.refresh();
