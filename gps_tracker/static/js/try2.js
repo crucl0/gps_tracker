@@ -1,6 +1,6 @@
 'use strict';
 
-var map;
+var map, google;
 var point;
 var chosen;
 var intervalID;
@@ -15,7 +15,7 @@ function initialize() {
   map = new google.maps.Map(document.getElementById('map_canvas'),
       mapOptions);
   
-  drawSavedPoints(); 
+  drawSavedPoints();
 }
 
 
@@ -55,7 +55,7 @@ function addNewPoint() {
     point.close();
     markersPool.splice(markersPool.indexOf(point), 1);
     point = null;
-  } 
+  }
   chosen = false;
   map.setOptions({draggableCursor:'crosshair'});
   google.maps.event.addListener(map, 'click', function(event) {
@@ -134,7 +134,7 @@ function editPoint(id) {
     editMarker.description = response.description;
     editMarker.infowindow.open(map, editMarker.marker);
     editMarker.fromDB = true;
-    markersPool[ind] = editMarker;    
+    markersPool[ind] = editMarker;
   };
 
   google.maps.event.addListener(editMarker.infowindow, 'closeclick', function() {
@@ -162,7 +162,7 @@ function checkInPool(point, property, value) {
         if (point[property] == value) {
           return true;
         } else {
-          console.log('Such property was found but value did not match. ' + 
+          console.log('Such property was found but value did not match. ' +
             'Property «'+property+'» has the value «'+point[property]+'», not «'+value+'». Sory.');
           return false;
         }
@@ -283,70 +283,70 @@ function convertDate(inputFormat) {
 function fillWhatExists(source) {
 
   var div_fromDB = document.createElement('div');
-     div_fromDB.id = "fromDB";
-     div_fromDB.style.minHeight = "150px";
+     div_fromDB.id = 'fromDB';
+     div_fromDB.style.minHeight = '150px';
   //
      var div_header = document.createElement('div');
-        div_header.id = "header";
+        div_header.id = 'header';
 
         var span_header_text = document.createElement('span');
-           span_header_text.id = "gas_station"+"-"+source._id;
+           span_header_text.id = 'gas_station'+'-'+source._id;
            span_header_text.ondblclick = function(){
               console.log(this, source._id);
               transform(this, source._id);
            };
-           span_header_text.style.marginRight = "10px";
+           span_header_text.style.marginRight = '10px';
            span_header_text.appendChild( document.createTextNode(source.gas_station) );
         div_header.appendChild( span_header_text );
 
         var span_editPen = document.createElement('span');
            span_editPen.onclick = function(){
-              editPoint(source._id)
+              editPoint(source._id);
            };
-           span_editPen.id = "editPen";
-           span_editPen.title = "Edit this point";
-           span_editPen.textContent = "✎";
-           span_editPen.style.float = "right";
+           span_editPen.id = 'editPen';
+           span_editPen.title = 'Edit this point';
+           span_editPen.textContent = '✎';
+           span_editPen.style.float = 'right';
         div_header.appendChild( span_editPen );
 
      div_fromDB.appendChild( div_header );
   //
      var div_date = document.createElement('div');
-        div_date.id = "date";
+        div_date.id = 'date';
 
         var span_time_icon = document.createElement('span');
-           span_time_icon.id = "time_icon";
-           span_time_icon.appendChild( document.createTextNode("⌚") );
+           span_time_icon.id = 'time_icon';
+           span_time_icon.appendChild( document.createTextNode('⌚') );
         div_date.appendChild( span_time_icon );
 
         var span_time = document.createElement('span');
-           span_time.id = "time";
+           span_time.id = 'time';
            span_time.innerHTML = convertDate(source.date);
         div_date.appendChild( span_time );
 
      div_fromDB.appendChild( div_date );
   //
      var div_infoBody = document.createElement('div');
-        div_infoBody.id = "description"+"-"+source.description;
+        div_infoBody.id = 'description'+'-'+source.description;
         div_infoBody.textContent = source.description;
         div_infoBody.ondblclick = function(){
               console.log(this, source.description);
               transform(this, source._id);
            };
-        div_infoBody.style.marginBottom = "10px";
+        div_infoBody.style.marginBottom = '10px';
      div_fromDB.appendChild( div_infoBody );
   //
      var div_dButton = document.createElement('div');
-        div_dButton.id = "dButton";
+        div_dButton.id = 'dButton';
 
         var span_del = document.createElement('span');
-          span_del.id = "delete";
+          span_del.id = 'delete';
            span_del.onclick = function(){
-              deleteFromMongo(source._id)
+              deleteFromMongo(source._id);
            };
-           span_del.className = "delButton";
-           span_del.title = "Delete this point";
-           span_del.textContent = "✂";
+           span_del.className = 'delButton';
+           span_del.title = 'Delete this point';
+           span_del.textContent = '✂';
         div_dButton.appendChild( span_del );
   //
      div_fromDB.appendChild( div_dButton );
@@ -356,7 +356,6 @@ function fillWhatExists(source) {
 
 
 function transform (elem, id) {
-  var id = id;
   var old = document.getElementById(elem.id);
 
   if (elem.id.split('-')[0] == 'gas_station') {
@@ -365,7 +364,8 @@ function transform (elem, id) {
     input.setAttribute('autofocus', true);
     input.setAttribute('maxlength', 20);
     input.style.width = '180px';
-  } else {
+  
+  } else if (elem.id.split('-')[0] == 'description'){
 
     var input = document.createElement('textarea');
     input.setAttribute('autofocus', true);
@@ -375,12 +375,9 @@ function transform (elem, id) {
     input.style.marginBottom = '10px';
 
   }
-  // input.setAttribute('type', 'text');
-  // input.setAttribute('autofocus', true);
-  // input.setAttribute('maxlength', 20);
+
   input.id = 'replace' + elem.id;
   input.value = old.textContent;
-  // input.style.width = '140px';
   input.style.float = 'left';
 
   old.parentNode.replaceChild( input, old);
