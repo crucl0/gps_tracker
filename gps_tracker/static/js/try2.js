@@ -117,6 +117,8 @@ function editPoint(id) {
   editMarker.infowindow = addInfoWindow(editForm);
   editMarker.infowindow.open(map, editMarker.marker);
 
+  editMarker.marker.setDraggable(true);
+
   document.getElementById('pButton').onclick = function() {
     editMarker.gas_station = document.getElementById('gas_station').value;
     editMarker.description = document.getElementById('description').value;
@@ -137,6 +139,7 @@ function editPoint(id) {
 
   google.maps.event.addListener(editMarker.infowindow, 'closeclick', function() {
     editMarker.infowindow = origin_info;
+    editMarker.infowindow.open(map, editMarker.marker);
       });
 }
 
@@ -184,12 +187,7 @@ function geoLocation() {
     function(position) {
       var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
-      console.log(pos);
       map.setCenter(pos);
-
-      console.log('There are '+markersPool.length+' markers on the map');
-
-
 
       if (checkInPool(point, 'fromDB', false) && checkInPool(point, 'current', true)) {
         point.refresh();
@@ -200,13 +198,11 @@ function geoLocation() {
         point.fromDB = false;
         markersPool.push(point);
         intervalID = setInterval(relocate, 5000);
-        console.log('There are '+markersPool.length+' markers on the map');
-
       }
+
       google.maps.event.addListener(point.infowindow, 'closeclick', function() {
           point.marker.setVisible(false);
           markersPool.splice(markersPool.indexOf(point), 1);
-          console.log('There are '+markersPool.length+' markers on the map');
           clearInterval(intervalID);
       });
     }
@@ -280,23 +276,126 @@ function fillNewForm(pos) {
 function convertDate(inputFormat) {
   function pad(s) { return (s < 10) ? '0' + s : s; }
   var d = new Date(inputFormat);
-  return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/') +
-          '&nbsp;&nbsp;<u>at</u>&nbsp;' + [d.getHours(), d.getMinutes()].join(':');
+  return [' '+pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/');
 }
+
 
 function fillWhatExists(source) {
-  var info = '<div id="fromDB">'+
-      '<div id="header">' + source.gas_station + '&nbsp;' + 
-        '<span title="Edit this point" id="editPen" onclick=editPoint("'+source._id+'")>✎</span></div> ' +
-      '<div id="date"><span id="time">⌚&nbsp;</span>' + convertDate(source.date) + '</div>' +     
-      '<div id="infoBody">'+ source.description + '</div>' +
-      '<div id="dButton"><span title="Delete this point" class="delButton" onclick=deleteFromMongo("'+source._id+'")>'+
-        '✂</span></div>'+
-      '</div>';
 
-  return info;
+  var div_fromDB = document.createElement('div');
+     div_fromDB.id = "fromDB";
+     div_fromDB.style.minHeight = "150px";
+  //
+     var div_header = document.createElement('div');
+        div_header.id = "header";
+
+        var span_header_text = document.createElement('span');
+           span_header_text.id = "gas_station"+"-"+source._id;
+           span_header_text.ondblclick = function(){
+              console.log(this, source._id);
+              transform(this, source._id);
+           };
+           span_header_text.style.marginRight = "10px";
+           span_header_text.appendChild( document.createTextNode(source.gas_station) );
+        div_header.appendChild( span_header_text );
+
+        var span_editPen = document.createElement('span');
+           span_editPen.onclick = function(){
+              editPoint(source._id)
+           };
+           span_editPen.id = "editPen";
+           span_editPen.title = "Edit this point";
+           span_editPen.textContent = "✎";
+           span_editPen.style.float = "right";
+        div_header.appendChild( span_editPen );
+
+     div_fromDB.appendChild( div_header );
+  //
+     var div_date = document.createElement('div');
+        div_date.id = "date";
+
+        var span_time_icon = document.createElement('span');
+           span_time_icon.id = "time_icon";
+           span_time_icon.appendChild( document.createTextNode("⌚") );
+        div_date.appendChild( span_time_icon );
+
+        var span_time = document.createElement('span');
+           span_time.id = "time";
+           span_time.innerHTML = convertDate(source.date);
+        div_date.appendChild( span_time );
+
+     div_fromDB.appendChild( div_date );
+  //
+     var div_infoBody = document.createElement('div');
+        div_infoBody.id = "description"+"-"+source.description;
+        div_infoBody.textContent = source.description;
+        div_infoBody.ondblclick = function(){
+              console.log(this, source.description);
+              transform(this, source._id);
+           };
+        div_infoBody.style.marginBottom = "10px";
+     div_fromDB.appendChild( div_infoBody );
+  //
+     var div_dButton = document.createElement('div');
+        div_dButton.id = "dButton";
+
+        var span_del = document.createElement('span');
+          span_del.id = "delete";
+           span_del.onclick = function(){
+              deleteFromMongo(source._id)
+           };
+           span_del.className = "delButton";
+           span_del.title = "Delete this point";
+           span_del.textContent = "✂";
+        div_dButton.appendChild( span_del );
+  //
+     div_fromDB.appendChild( div_dButton );
+
+   return div_fromDB;
 }
 
+
+function transform (elem, id) {
+  var id = id;
+  var old = document.getElementById(elem.id);
+
+  if (elem.id.split('-')[0] == 'gas_station') {
+    var input = document.createElement('input');
+    input.setAttribute('type', 'text');
+    input.setAttribute('autofocus', true);
+    input.setAttribute('maxlength', 20);
+    input.style.width = '180px';
+  } else {
+
+    var input = document.createElement('textarea');
+    input.setAttribute('autofocus', true);
+    input.setAttribute('maxlength', 140);
+    input.style.width = '220px';
+    input.style.height = '5em';
+    input.style.marginBottom = '10px';
+
+  }
+  // input.setAttribute('type', 'text');
+  // input.setAttribute('autofocus', true);
+  // input.setAttribute('maxlength', 20);
+  input.id = 'replace' + elem.id;
+  input.value = old.textContent;
+  // input.style.width = '140px';
+  input.style.float = 'left';
+
+  old.parentNode.replaceChild( input, old);
+  
+  input.onblur = function() {
+    old.textContent = input.value;
+    input.parentNode.replaceChild(old, input);
+
+    var dataToPatch = {};
+    dataToPatch[elem.id.split('-')[0]] = input.value;
+    dataToPatch['date'] = new Date();
+    patchIntoMongo(id, dataToPatch);
+  };
+
+}
 // END of the constructor and methods
 // ==================================
 
@@ -391,6 +490,19 @@ function putIntoMongo(editMarker){
   return response;
 }
 
+
+function patchIntoMongo(id, dataToPatch){
+  var request = null;
+  var url = '/points/' + id;
+  request = new XMLHttpRequest();
+  request.open('PATCH', url, false);
+  request.setRequestHeader('Content-type', 'application/json');
+  request.send(JSON.stringify(dataToPatch));
+
+  var response = JSON.parse(request.responseText);
+  console.log(response);
+  return response;
+}
 // END of the block with commands to MongoDB
 // =======================================
 

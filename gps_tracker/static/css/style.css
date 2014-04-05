@@ -34,6 +34,45 @@ li {
     padding-right: 2px;
 }
 
+fieldset {
+  font-family: sans-serif;
+  border-top: 1px solid #AECFAE;
+  border-bottom: 0px;
+  border-right: 0px;
+  border-left: 1px solid #AECFAE;
+  border-radius: 3px;
+}
+
+fieldset legend {
+  color: #80B280;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px #80B280;
+}
+
+input[type=text] {
+  border: 1px dotted #80B280;
+  border-radius: 3px;
+  box-shadow: 
+      inset 0 0 2px  rgba(0,0,0,0.1),
+            0 0 4px rgba(0,0,0,0.1); 
+  outline: none;
+  color: #444;
+}
+
+label {
+  color: #222;
+}
+
+textarea {
+  border: 1px dotted #80B280;
+  border-radius: 3px;
+  box-shadow: 
+      inset 0 0 1px  rgba(0,0,0,0.1),
+            0 0 2px rgba(0,0,0,0.1); 
+  outline: none;
+  color: #444; 
+}
+
 button.btn {
   background: #D7F0D7;
   border: 1px solid #AECFAE;
@@ -66,9 +105,11 @@ button.btn {
 }
 
 #fromDB {
+  position: relative;
   max-width: 250px;
+  width: 215px;
   height: 100%;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
 #fromDB>#header {
@@ -78,6 +119,7 @@ button.btn {
   padding-bottom: 0px;
 }
 
+
 #fromDB>#date {
   font-size: 12px;
   color: #555;
@@ -86,27 +128,26 @@ button.btn {
   vertical-align: middle;
 }
 
-#fromDB>#infoBody {
-  font-size: 15px;
-  height: 100%;
-  margin-bottom: 10px; 
-}
 
 #fromDB>#dButton {
   width: 100%;
+  position: absolute;
+  bottom: 0px;
 }
 
 #editPen {
   font-size: 23px;
   color: #555;
   float: right;
+  vertical-align: top;
 }
+
 #editPen:hover {
   color: #80B280;
   cursor: pointer;
 }
 
-#time {
+#time_icon {
   color: green;
   font-size: 18px;
 }
