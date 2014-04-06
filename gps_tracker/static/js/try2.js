@@ -290,9 +290,8 @@ function fillWhatExists(source) {
         div_header.id = 'header';
 
         var span_header_text = document.createElement('span');
-           span_header_text.id = 'gas_station'+'-'+source._id;
+           span_header_text.id = 'gas_station'+'~'+source._id;
            span_header_text.ondblclick = function(){
-              console.log(this, source._id);
               transform(this, source._id);
            };
            span_header_text.style.marginRight = '10px';
@@ -320,17 +319,19 @@ function fillWhatExists(source) {
         div_date.appendChild( span_time_icon );
 
         var span_time = document.createElement('span');
-           span_time.id = 'time';
+           span_time.id = 'date'+'~'+source.date;
            span_time.innerHTML = convertDate(source.date);
+           span_time.ondblclick = function(){
+              transform(this, source._id);
+            };
         div_date.appendChild( span_time );
 
      div_fromDB.appendChild( div_date );
   //
      var div_infoBody = document.createElement('div');
-        div_infoBody.id = 'description'+'-'+source.description;
+        div_infoBody.id = 'description'+'~'+source.description;
         div_infoBody.textContent = source.description;
         div_infoBody.ondblclick = function(){
-              console.log(this, source.description);
               transform(this, source._id);
            };
         div_infoBody.style.marginBottom = '10px';
@@ -358,38 +359,64 @@ function fillWhatExists(source) {
 function transform (elem, id) {
   var old = document.getElementById(elem.id);
 
-  if (elem.id.split('-')[0] == 'gas_station') {
+  if (elem.id.split('~')[0] == 'gas_station') {
     var input = document.createElement('input');
     input.setAttribute('type', 'text');
     input.setAttribute('autofocus', true);
     input.setAttribute('maxlength', 20);
     input.style.width = '180px';
+    input.value = old.textContent;
+    input.id = 'replace' + elem.id;
+    input.style.float = 'left';
   
-  } else if (elem.id.split('-')[0] == 'description'){
+  } else if (elem.id.split('~')[0] == 'description'){
 
     var input = document.createElement('textarea');
     input.setAttribute('autofocus', true);
     input.setAttribute('maxlength', 140);
+    input.value = old.textContent;
     input.style.width = '220px';
     input.style.height = '5em';
     input.style.marginBottom = '10px';
+    input.id = 'replace' + elem.id;
+    input.style.float = 'left';
 
+  } else {
+    var input = document.createElement('input');
+    input.setAttribute('type', 'date');
+    input.setAttribute('autofocus', true);
+    var d = elem.id.split('~')[1];
+    input.value = d.split('T')[0];
+    input.style.width = '170px';
+    input.style.float = 'right';
   }
-
-  input.id = 'replace' + elem.id;
-  input.value = old.textContent;
-  input.style.float = 'left';
 
   old.parentNode.replaceChild( input, old);
   
   input.onblur = function() {
-    old.textContent = input.value;
-    input.parentNode.replaceChild(old, input);
 
-    var dataToPatch = {};
-    dataToPatch[elem.id.split('-')[0]] = input.value;
-    dataToPatch['date'] = new Date();
-    patchIntoMongo(id, dataToPatch);
+    if (input.type == 'date') {
+      var chosenDate = input.value.split('-');
+      var isoDate = new Date;
+      isoDate.setFullYear(chosenDate[0]);
+      isoDate.setMonth(chosenDate[1]-1);
+      isoDate.setDate(chosenDate[2])
+      input.parentNode.replaceChild(old, input);
+      old.textContent = convertDate(isoDate);
+
+      var dataToPatch = {};
+      dataToPatch['date'] = isoDate;
+      patchIntoMongo(id, dataToPatch);
+
+    } else {
+      old.textContent = input.value;
+      input.parentNode.replaceChild(old, input);
+
+      var dataToPatch = {};
+      dataToPatch[elem.id.split('~')[0]] = input.value;
+      dataToPatch['date'] = new Date();
+      patchIntoMongo(id, dataToPatch);
+    }
   };
 
 }
@@ -411,7 +438,7 @@ function getFromMongo(url) {
 }
 
 function postToMongo() {
-  var now = new Date();
+  var now = new Date;
     var data = {
         lat: document.getElementById('lat').value,
         lng: document.getElementById('lng').value,
@@ -467,7 +494,7 @@ function deleteFromMongo(id) {
 
 function putIntoMongo(editMarker){
   var request = null;
-  var now = new Date();
+  var now = new Date;
   var pointToEdit = {
     _id: editMarker.id,
     lat: editMarker.marker.getPosition().lat(),
@@ -497,7 +524,6 @@ function patchIntoMongo(id, dataToPatch){
   request.send(JSON.stringify(dataToPatch));
 
   var response = JSON.parse(request.responseText);
-  console.log(response);
   return response;
 }
 // END of the block with commands to MongoDB

@@ -54,7 +54,7 @@ fieldset legend {
   box-shadow: 0 0 0 1px #80B280;
 }
 
-input[type=text] {
+input {
   border: 1px dotted #80B280;
   border-radius: 3px;
   box-shadow: 
