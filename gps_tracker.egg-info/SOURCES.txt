@@ -5,6 +5,7 @@ setup.cfg
 setup.py
 gps_tracker/__init__.py
 gps_tracker/db.py
+gps_tracker/resources.py
 gps_tracker/views.py
 gps_tracker.egg-info/PKG-INFO
 gps_tracker.egg-info/SOURCES.txt
@@ -16,7 +17,6 @@ gps_tracker.egg-info/top_level.txt
 gps_tracker/static/css/style.css
 gps_tracker/static/js/try2.js
 gps_tracker/templates/index.html
-gps_tracker/tests/__init__.py
 gps_tracker/tests/baseconfig.py
 gps_tracker/tests/fixture.py
 gps_tracker/tests/test_db_connection.py

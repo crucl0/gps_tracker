@@ -1,6 +1,5 @@
-
 class Resource(object):
-    def __init__(self, request=None, parent=None, name=None):
+    def __init__(self, request=None, parent=None, name=''):
         self.request = request
         self.__parent__ = parent
         self.__name__ = str(name)
@@ -8,7 +7,7 @@ class Resource(object):
 
 class Root(Resource):
     def __getitem__(self, item):
-        if item == 'points':
+        if str(item) == 'points':
             return Points(self.request, self, item)
         else:
             raise KeyError('Nope')
@@ -16,7 +15,7 @@ class Root(Resource):
 
 class Points(Resource):
     def __getitem__(self, item):
-        if item:
+        if str(item):
             return Point(self.request, self, item)
         else:
             raise KeyError('Nope')

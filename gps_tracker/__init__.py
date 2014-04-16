@@ -16,8 +16,8 @@ def main(global_config, **settings):
     # config.add_route('companies', '/companies')
     # config.add_route('company', '/companies/{name}')
     config.add_view(points_get_all, context=Points, renderer='json')
-    config.add_static_view('/', 'gps_tracker:templates/', cache_max_age=0)
+    # config.add_static_view('/', 'gps_tracker:templates/', cache_max_age=0)
 
     config.add_request_method(mongo_db_connection, 'mongo_db', reify=True)
-    config.scan()
+    # config.scan()
     return config.make_wsgi_app()
