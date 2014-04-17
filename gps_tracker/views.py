@@ -24,7 +24,7 @@ class RESTView(object):
     def add_new(self):
         item_new = {key: self.request.json_body[key] for key in self.request.json_body}
         item_new_id = getattr(self.request.mongo_db, self.resource).insert(item_new)
-        return self.request.mongo_db.points.find_one(item_new_id)
+        return getattr(self.request.mongo_db, self.resource).find_one(item_new_id)
 
     def put(self):
         pass
