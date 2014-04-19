@@ -66,3 +66,65 @@ class RESTView(object):
             return {}
         except InvalidId:
             return HTTPNotFound("There is no such object")
+
+
+def includeme(config):
+    # POINTS views
+    config.add_view(
+        RESTView, route_name='points', attr='get_all',
+        request_method='GET', renderer='json')
+    config.add_view(
+        RESTView, route_name='point', attr='get_one',
+        request_method='GET', renderer='json')
+    config.add_view(
+        RESTView, route_name='points', attr='add_new',
+        request_method='POST', renderer='json')
+    config.add_view(
+        RESTView, route_name='point', attr='update_one',
+        request_method='PUT', renderer='json')
+    config.add_view(
+        RESTView, route_name='point', attr='edit_one',
+        request_method='PATCH', renderer='json')
+    config.add_view(
+        RESTView, route_name='point', attr='delete_one',
+        request_method='DELETE', renderer='json')
+
+    # COMPANIES views
+    config.add_view(
+        RESTView, route_name='companies', attr='get_all',
+        request_method='GET', renderer='json')
+    config.add_view(
+        RESTView, route_name='company', attr='get_one',
+        request_method='GET', renderer='json')
+    config.add_view(
+        RESTView, route_name='companies', attr='add_new',
+        request_method='POST', renderer='json')
+    config.add_view(
+        RESTView, route_name='company', attr='update_one',
+        request_method='PUT', renderer='json')
+    config.add_view(
+        RESTView, route_name='company', attr='edit_one',
+        request_method='PATCH', renderer='json')
+    config.add_view(
+        RESTView, route_name='company', attr='delete_one',
+        request_method='DELETE', renderer='json')
+
+    # STATIONS views
+    config.add_view(
+        RESTView, route_name='stations', attr='get_all',
+        request_method='GET', renderer='json')
+    config.add_view(
+        RESTView, route_name='station', attr='get_one',
+        request_method='GET', renderer='json')
+    config.add_view(
+        RESTView, route_name='stations', attr='add_new',
+        request_method='POST', renderer='json')
+    config.add_view(
+        RESTView, route_name='station', attr='update_one',
+        request_method='PUT', renderer='json')
+    config.add_view(
+        RESTView, route_name='station', attr='edit_one',
+        request_method='PATCH', renderer='json')
+    config.add_view(
+        RESTView, route_name='station', attr='delete_one',
+        request_method='DELETE', renderer='json')
