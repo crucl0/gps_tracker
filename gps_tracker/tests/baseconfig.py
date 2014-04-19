@@ -1,6 +1,7 @@
 import unittest
 from pyramid import testing
 from .fixture import fixture_points
+from gps_tracker.views import RESTView
 
 from pyramid.paster import get_appsettings
 
@@ -30,4 +31,11 @@ class BaseConfig(unittest.TestCase):
         """
         request = testing.DummyRequest()
         request.mongo_db = self.mongo_db
+        request.path_info_peek = lambda: 'points'
         return request
+
+    def _make_one(self, request):
+        """ Instance of RESTView class is creating here
+        """
+        inst = RESTView(request)
+        return inst

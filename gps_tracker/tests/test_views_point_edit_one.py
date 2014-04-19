@@ -1,10 +1,6 @@
 from .baseconfig import BaseConfig
-
 from pyramid.httpexceptions import (HTTPNotFound,
                                     HTTPBadRequest)
-
-from gps_tracker.views import (point_edit_one,
-                               point_get_one)
 
 
 class TestViewsPointEditOne(BaseConfig):
@@ -14,9 +10,10 @@ class TestViewsPointEditOne(BaseConfig):
         """ This point doesn't exist, does it?
         """
         request = self.own_request()
-
         request.matchdict = {'id': '5309deeca7cade7139b53'}
-        point = point_edit_one(request)
+
+        inst = self._make_one(request)
+        point = inst.edit_one()
         self.assertIsInstance(point, HTTPNotFound)
 
     def test_valid_id(self):
@@ -25,7 +22,8 @@ class TestViewsPointEditOne(BaseConfig):
         request = self.own_request()
         request.matchdict = {'id': '5309deeca7cade7139b537f9'}
 
-        point = point_get_one(request)
+        inst = self._make_one(request)
+        point = inst.get_one()
         self.assertEqual(point['gas_station'], 'Lukoil')
 
     def test_empty_request_body(self):
@@ -35,7 +33,8 @@ class TestViewsPointEditOne(BaseConfig):
         request.matchdict = {'id': '5309deeca7cade7139b537f9'}
         request.json_body = {}
 
-        point = point_edit_one(request)
+        inst = self._make_one(request)
+        point = inst.edit_one()
         self.assertIsInstance(point, HTTPBadRequest)
 
     def test_wrong_type(self):
@@ -45,7 +44,8 @@ class TestViewsPointEditOne(BaseConfig):
         request.matchdict = {'id': '5309deeca7cade7139b537f9'}
         request.json_body = 5
 
-        point = point_edit_one(request)
+        inst = self._make_one(request)
+        point = inst.edit_one()
         self.assertIsInstance(point, HTTPBadRequest)
 
     def test_correct_edition(self):
@@ -55,6 +55,7 @@ class TestViewsPointEditOne(BaseConfig):
         request.matchdict = {'id': '5309deeca7cade7139b537f9'}
         request.json_body = {'gas_station': 'MyOwnStation'}
 
-        point = point_edit_one(request)
+        inst = self._make_one(request)
+        point = inst.edit_one()
         self.assertNotEqual(point['gas_station'], 'Lukoil')
         self.assertEqual(point['gas_station'], 'MyOwnStation')

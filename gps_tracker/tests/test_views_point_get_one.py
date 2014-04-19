@@ -1,8 +1,6 @@
 from .baseconfig import BaseConfig
 from bson.errors import InvalidId
 
-from gps_tracker.views import point_get_one
-
 
 class TestViewsPointGetOne(BaseConfig):
     """ Try to get one point
@@ -11,9 +9,10 @@ class TestViewsPointGetOne(BaseConfig):
         """This point doesn't exist, does it?
         """
         request = self.own_request()
-
         request.matchdict = {'id': '5309deeca7cade7139b53'}
-        point_get_one(request)
+
+        inst = self._make_one(request)
+        inst.get_one()
         self.assertRaises(InvalidId)
 
     def test_valid_id(self):
@@ -21,7 +20,9 @@ class TestViewsPointGetOne(BaseConfig):
         """
         request = self.own_request()
         request.matchdict = {'id': '5309deeca7cade7139b537fa'}
-        point = point_get_one(request)
+
+        inst = self._make_one(request)
+        point = inst.get_one()
         self.assertIsInstance(point, dict)
         self.assertEqual(point['gas_station'], 'Shell')
 
@@ -30,5 +31,7 @@ class TestViewsPointGetOne(BaseConfig):
         """
         request = self.own_request()
         request.matchdict = {'id': '531ba74fa7cade60aa44ae8d'}
-        point_get_one(request)
+
+        inst = self._make_one(request)
+        inst.get_one()
         self.assertRaises(InvalidId)

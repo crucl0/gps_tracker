@@ -1,9 +1,5 @@
 from .baseconfig import BaseConfig
-
 from pyramid.httpexceptions import HTTPNotFound
-
-from gps_tracker.views import (point_delete_one,
-                               point_get_one)
 
 
 class TestViewsPointDeleteOne(BaseConfig):
@@ -15,7 +11,8 @@ class TestViewsPointDeleteOne(BaseConfig):
         request = self.own_request()
         request.matchdict = {'id': '5309deeca7cade7139b5'}
 
-        point = point_delete_one(request)
+        inst = self._make_one(request)
+        point = inst.delete_one()
         self.assertIsInstance(point, HTTPNotFound)
 
     def test_valid_id(self):
@@ -24,11 +21,12 @@ class TestViewsPointDeleteOne(BaseConfig):
         request = self.own_request()
         request.matchdict = {'id': '5309deeca7cade7139b537fb'}
 
-        point = point_get_one(request)
+        inst = self._make_one(request)
+        point = inst.get_one()
         self.assertNotEqual(len(point), 0)
 
-        point = point_delete_one(request)
+        point = inst.delete_one()
         self.assertEqual(point, {})
 
-        point = point_get_one(request)
+        point = inst.get_one()
         self.assertEqual(point, None)

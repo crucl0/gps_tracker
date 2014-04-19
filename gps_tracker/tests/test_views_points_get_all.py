@@ -1,7 +1,5 @@
 from .baseconfig import BaseConfig
 
-from gps_tracker.views import points_get_all
-
 
 class TestViewPointsGetAll(BaseConfig):
     """ Try to get all points
@@ -10,7 +8,7 @@ class TestViewPointsGetAll(BaseConfig):
         """ Try how it realy works.
         """
         request = self.own_request()
-
-        collection = points_get_all(request)
+        inst = self._make_one(request)
+        collection = inst.get_all()
         self.assertIsInstance(collection, list)
         self.assertEqual(len(collection), 6)

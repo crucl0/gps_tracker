@@ -12,7 +12,7 @@ class RESTView(object):
         self.mongo_collection = getattr(self.request.mongo_db, self.resource)
 
     def get_all(self):
-        return self.mongo_collection.find()
+        return list(self.mongo_collection.find())
 
     def get_one(self):
         try:
