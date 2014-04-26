@@ -24,7 +24,7 @@ function initialize() {
 function drawSavedPoints() {
   var points = getFromMongo('/points');
 
-  if (points === 0) {
+  if (points.length === 0) {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = new google.maps.LatLng(position.coords.latitude,
                                        position.coords.longitude);
@@ -36,15 +36,16 @@ function drawSavedPoints() {
     var info = fillWhatExists(points[i]);
         
     var point = new Marker(addMarker(tmpLatLng), addInfoWindow(info));
-    point.marker.setTitle(points[i].gas_station);
+    point.marker.setTitle(points[i].title);
 
     point.id = points[i]._id;
     point.description = points[i].description;
-    point.gas_station = points[i].gas_station;
+    point.title = points[i].title;
     point.fromDB = true;
     markersPool.push(point);
+    map.setCenter(point.marker.getPosition());
   }
-  map.setCenter(point.marker.getPosition());
+  // map.setCenter(point.marker.getPosition());
   }
 }
 
@@ -111,8 +112,8 @@ function editPoint(id) {
   }
 
   var editForm = fillNewForm(editMarker.marker.getPosition());
-  editForm.childNodes[1].gas_station.value = editMarker.gas_station;
-  editForm.childNodes[1].description.value = editMarker.description;
+  editForm.childNodes[1].title.value = editMarker.title;
+  editForm.childNodes[1].title.value = editMarker.title;
 
   editMarker.infowindow = addInfoWindow(editForm);
   editMarker.infowindow.open(map, editMarker.marker);
@@ -120,8 +121,8 @@ function editPoint(id) {
   editMarker.marker.setDraggable(true);
 
   document.getElementById('pButton').onclick = function() {
-    editMarker.gas_station = document.getElementById('gas_station').value;
-    editMarker.description = document.getElementById('description').value;
+    editMarker.title = document.getElementById('title').value;
+    editMarker.title = document.getElementById('description').value;
     editMarker.close();
        
     var response = putIntoMongo(editMarker);
@@ -130,7 +131,7 @@ function editPoint(id) {
 
     editMarker = new Marker(addMarker(pos), addInfoWindow(info));
     editMarker.id = response._id;
-    editMarker.gas_station = response.gas_station;
+    editMarker.title = response.title;
     editMarker.description = response.description;
     editMarker.infowindow.open(map, editMarker.marker);
     editMarker.fromDB = true;
@@ -218,7 +219,6 @@ function geoLocation() {
 // ========================================
 
 
-
 // ====================================
 // START of the constructor and methods
 function Marker(marker, infowindow) {
@@ -290,12 +290,12 @@ function fillWhatExists(source) {
         div_header.id = 'header';
 
         var span_header_text = document.createElement('span');
-           span_header_text.id = 'gas_station'+'~'+source._id;
+           span_header_text.id = 'title'+'~'+source._id;
            span_header_text.ondblclick = function(){
               transform(this, source._id);
            };
            span_header_text.style.marginRight = '10px';
-           span_header_text.appendChild( document.createTextNode(source.gas_station) );
+           span_header_text.appendChild( document.createTextNode(source.title) );
         div_header.appendChild( span_header_text );
 
         var span_editPen = document.createElement('span');
@@ -359,7 +359,7 @@ function fillWhatExists(source) {
 function transform (elem, id) {
   var old = document.getElementById(elem.id);
 
-  if (elem.id.split('~')[0] == 'gas_station') {
+  if (elem.id.split('~')[0] == 'title') {
     var input = document.createElement('input');
     input.setAttribute('type', 'text');
     input.setAttribute('autofocus', true);
@@ -397,10 +397,10 @@ function transform (elem, id) {
 
     if (input.type == 'date') {
       var chosenDate = input.value.split('-');
-      var isoDate = new Date;
+      var isoDate = new Date();
       isoDate.setFullYear(chosenDate[0]);
       isoDate.setMonth(chosenDate[1]-1);
-      isoDate.setDate(chosenDate[2])
+      isoDate.setDate(chosenDate[2]);
       input.parentNode.replaceChild(old, input);
       old.textContent = convertDate(isoDate);
 
@@ -424,7 +424,6 @@ function transform (elem, id) {
 // ==================================
 
 
-
 //==========================================
 // START of the block with commands to MongoDB
 function getFromMongo(url) {
@@ -437,19 +436,19 @@ function getFromMongo(url) {
     return response;
 }
 
-function postToMongo() {
-  var now = new Date;
+function postToMongo(url) {
+  var now = new Date();
     var data = {
         lat: document.getElementById('lat').value,
         lng: document.getElementById('lng').value,
-        gas_station: document.getElementById('gas_station').value,
+        title: document.getElementById('title').value,
         description: document.getElementById('description').value,
         date: now
     };
 
     var request = new XMLHttpRequest();
 
-    request.open('POST', '/points', false);
+    request.open('POST', url, false);
     request.setRequestHeader('Content-type', 'application/json');
     request.send(JSON.stringify(data));
 
@@ -494,7 +493,7 @@ function deleteFromMongo(id) {
 
 function putIntoMongo(editMarker){
   var request = null;
-  var now = new Date;
+  var now = new Date();
   var pointToEdit = {
     _id: editMarker.id,
     lat: editMarker.marker.getPosition().lat(),

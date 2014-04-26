@@ -10,7 +10,7 @@
     </script>
 
     <!-- my JS -->
-    <script type="text/javascript" src="/static/js/try2.js"></script>
+    <script type="text/javascript" src="/static/js/general.js"></script>
   </head>
 
   <body>
@@ -47,8 +47,8 @@
             </div>
 
             <div> 
-                <label>Gas station<br>
-                <input id="gas_station" name="gas_station" type="text" required="" maxlength="20"> 
+                <label>Title<br>
+                <input id="title" name="title" type="text" required="" maxlength="20"> 
                 </label> 
             </div>
 
@@ -58,7 +58,7 @@
                 </label> 
             </div> 
             <div>
-                <span id="pButton" class="postButton" onclick="postToMongo()">Save the point</span>
+                <span id="pButton" class="postButton" onclick="postToMongo('/points')">Save the point</span>
             </div>
           </fieldset>
     </form>
