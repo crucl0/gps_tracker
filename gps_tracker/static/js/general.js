@@ -3,6 +3,7 @@
 var map, google;
 var point;
 var chosen;
+var settings_flag;
 var intervalID;
 var markersPool = [];
 
@@ -220,10 +221,47 @@ function geoLocation() {
 
 
 // ============================================
-// START of the block with commands to Stations
+// START of the block with commands to Settings
 
-function addStation() {
-  
+function settings() {
+  if (!settings_flag) {
+    var sel = document.getElementById('companies_list');
+    if (sel.length === 0) {
+      settings_flag = true;
+      document.getElementById('map_canvas').style.display = 'none';
+      document.getElementById('settings_panel').style.display = 'block';
+
+      var companies_list = getFromMongo('/companies');
+      var zero_opt = document.createElement('option');
+      zero_opt.innerHTML = 'Choose the company';
+      zero_opt.value = -1;
+      sel.appendChild(zero_opt);
+      for (var i=0;i<companies_list.length;i++) {
+        var opt = document.createElement('option');
+        opt.innerHTML = companies_list[i].title;
+        opt.value = companies_list[i]._id;
+        sel.appendChild(opt);
+      }
+    } else {
+      settings_flag = true;
+      document.getElementById('map_canvas').style.display = 'none';
+      document.getElementById('settings_panel').style.display = 'block';
+    }
+
+  } else {
+    settings_flag = false;
+    document.getElementById('map_canvas').style.display = 'block';
+    document.getElementById('right_panel').style.display = 'none';
+  }
+}
+
+function showCompany(id) {
+  var company = getFromMongo('/companies/'+id);
+  var div_company = fillWhatExists(company);
+  div_company.style.minWidth = '450px';
+  div_company.style.minHeight = '200px';
+  var list_div = document.getElementById('companies_container');
+  list_div.appendChild(div_company);
 }
 
 // END of the block with commands to Stations
