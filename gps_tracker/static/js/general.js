@@ -219,6 +219,16 @@ function geoLocation() {
 // ========================================
 
 
+// ============================================
+// START of the block with commands to Stations
+
+function addStation() {
+  
+}
+
+// END of the block with commands to Stations
+// ==========================================
+
 // ====================================
 // START of the constructor and methods
 function Marker(marker, infowindow) {
