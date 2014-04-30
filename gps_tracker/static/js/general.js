@@ -300,8 +300,32 @@ function showCompany(id) {
   var div_company = fillWhatExists('/companies/', company);
   div_company.style.minWidth = '450px';
   div_company.style.minHeight = '200px';
-  var list_div = document.getElementById('companies_container');
-  list_div.appendChild(div_company);
+  
+  var list_div = document.getElementById('companies_container');  
+  var old = list_div.childNodes[0];
+  list_div.replaceChild(div_company, old);
+  document.getElementById('editPen').parentNode.removeChild(document.getElementById('editPen'));
+  document.getElementById('date').parentNode.removeChild(document.getElementById('date'));
+  document.getElementById('header').style.marginBottom = '10px';
+
+  var stations_of_company = [];
+  var stations = getFromMongo('/stations');
+  for (var i=0;i<stations.length;i++) {
+    if (stations[i].company == company.title) {
+      stations_of_company.push(stations[i]);
+    }
+  }
+
+  var stations_list = document.createElement('div');
+  for (var i=0; i<stations_of_company.length; i++) {
+    var div_station = fillWhatExists('/stations/', stations_of_company[i]);
+    div_station.childNodes[0].removeChild(div_station.childNodes[0].childNodes[1]);
+    stations_list.appendChild(div_station);
+
+  }
+  var stations_div_ = document.getElementById('stations');
+  var old_list = stations_div_.childNodes[1];
+  stations_div_.replaceChild(stations_list, old_list);
 }
 
 // END of the block with commands to Settings
@@ -499,7 +523,7 @@ function transform (resource, elem, id) {
 
       var dataToPatch = {};
       dataToPatch['date'] = isoDate;
-      patchIntoMongo(resource+'/'+id, dataToPatch);
+      patchIntoMongo(resource+id, dataToPatch);
 
     } else {
       old.textContent = input.value;
@@ -508,7 +532,7 @@ function transform (resource, elem, id) {
       var dataToPatch = {};
       dataToPatch[elem.id.split('~')[0]] = input.value;
       dataToPatch['date'] = new Date();
-      patchIntoMongo(resource+'/'+id, dataToPatch);
+      patchIntoMongo(resource+id, dataToPatch);
     }
   };
 

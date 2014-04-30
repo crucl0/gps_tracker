@@ -129,6 +129,7 @@ button.btn {
 #settings_panel>#companies {
   position: relative;
   float: left;
+  padding: 10px;
   background-color: #999;
   height: 100%;
   width: 30%;      
@@ -146,17 +147,17 @@ button.btn {
 #settings_panel>#companies>#companies_container {
   position: relative;
   vertical-align: bottom;
-/*  height: 100%;
-  width: 86%;*/
   background-color: yellow;
 }
 
 #settings_panel>#stations {
   position: relative;
-  float: right;
-  background-color: green;
+  float: left;
+  padding: 10px;
+  background-color: white;
+  border-left: 2px solid #AECFAE;
   height: 100%;
-  width: 70%;
+  width: 65%;
 }
 
 #map_canvas { 
