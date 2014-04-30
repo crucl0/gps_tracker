@@ -21,10 +21,10 @@
                     <button class="btn" id="showLoc" onclick="geoLocation()" title="Show my current location">↻</button>
                 </li>
                 <li>
-                    <button class="btn" id="addPoint" onclick="addNewPoint()" title="Choose a point">◉</button>
+                    <button class="btn" id="addPoint" onclick="addNew('/points')" title="Choose a point">◉</button>
                 </li>
                 <li>
-                    <button class="btn" id="addStation" onclick="addNewStation()" title="Choose a station">⛽</button>
+                    <button class="btn" id="addStation" onclick="addNew('/stations')" title="Choose a station">⛽</button>
                 </li>
                 <li>
                     <button class="btn" id="settings" onclick="settings()" title="Settings">⚙</button>
@@ -51,7 +51,7 @@
     <div id="form_canvas">
     <form id="newForm">
         <fieldset form="newForm"> 
-            <legend><b>POINT DETAILS</b></legend> 
+            <legend><b>OBJECT DETAILS</b></legend> 
          
             <div> 
                 <label>Latitude<br>
@@ -63,6 +63,12 @@
                 <label>Longitude<br>
                 <input id="lng" name="longitude" type="text" required=""> 
                 </label> 
+            </div>
+
+            <div id="select_div">
+                <label>Company:<br>
+                    <select id="select_form"></select>
+                </label><br><br>
             </div>
 
             <div> 
@@ -77,7 +83,7 @@
                 </label> 
             </div> 
             <div>
-                <span id="pButton" class="postButton" onclick="postToMongo('/points')">Save the point</span>
+                <span id="pButton" class="postButton" onclick="postToMongo('/points')"> Save this object </span>
             </div>
           </fieldset>
     </form>

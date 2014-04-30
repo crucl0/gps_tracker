@@ -4,6 +4,7 @@ var map, google;
 var point;
 var chosen;
 var settings_flag;
+var current_res;
 var intervalID;
 var markersPool = [];
 
@@ -24,7 +25,10 @@ function initialize() {
 // START of the block with commands to Points
 function drawSavedPoints() {
   var points = getFromMongo('/points');
-
+  var stations = getFromMongo('/stations');
+  for (var i=0; i<stations.length; i++) {
+    points.push(stations[i]);
+  }
   if (points.length === 0) {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = new google.maps.LatLng(position.coords.latitude,
@@ -34,7 +38,7 @@ function drawSavedPoints() {
   } else {
   for (var i=0; i<points.length; i++) {
     var tmpLatLng = new google.maps.LatLng(points[i].lat, points[i].lng);
-    var info = fillWhatExists(points[i]);
+    var info = fillWhatExists('/points', points[i]);
         
     var point = new Marker(addMarker(tmpLatLng), addInfoWindow(info));
     point.marker.setTitle(points[i].title);
@@ -43,15 +47,39 @@ function drawSavedPoints() {
     point.description = points[i].description;
     point.title = points[i].title;
     point.fromDB = true;
+    if (points[i].hasOwnProperty('company')) {
+      point.marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+    }
     markersPool.push(point);
     map.setCenter(point.marker.getPosition());
   }
-  // map.setCenter(point.marker.getPosition());
   }
 }
 
 
-function addNewPoint() {
+function addNew(resource) {
+  current_res = resource
+  if (resource === '/stations') {
+    document.getElementById('select_div').style.display = 'block';
+    var sel = document.getElementById('select_form');
+
+    if (sel.length === 0) {
+      var companies_list = getFromMongo('/companies');
+      var zero_opt = document.createElement('option');
+      zero_opt.innerHTML = 'Choose the company';
+      zero_opt.value = -1;
+      sel.appendChild(zero_opt);
+      for (var i=0;i<companies_list.length;i++) {
+        var opt = document.createElement('option');
+        opt.innerHTML = companies_list[i].title;
+        opt.value = companies_list[i]._id;
+        sel.appendChild(opt);
+      }
+    }
+  } else {
+    document.getElementById('select_div').style.display = 'none';
+  }
+
   if (checkInPool(point, 'current', true) || (checkInPool(point, 'manual', true))) {
     clearInterval(intervalID);
     point.close();
@@ -60,6 +88,7 @@ function addNewPoint() {
   }
   chosen = false;
   map.setOptions({draggableCursor:'crosshair'});
+
   google.maps.event.addListener(map, 'click', function(event) {
     if (!chosen) {
       var pos = event.latLng;
@@ -69,6 +98,14 @@ function addNewPoint() {
       point.marker.setDraggable(true);
       point.fromDB = false;
       point.manual = true;
+      document.getElementById('pButton').onclick = function() {
+        postToMongo(current_res);
+      }
+
+      if (current_res === '/stations') {
+        point.stations = true;
+        point.marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+      }
       map.setOptions({draggableCursor: null});
       chosen = true;
       markersPool.push(point);
@@ -76,6 +113,7 @@ function addNewPoint() {
       google.maps.event.addListener(point.infowindow, 'closeclick', function() {
         point.marker.setVisible(false);
         map.setOptions({draggableCursor: null});
+        document.getElementById('select_div').style.display = 'none';
       });
 
       google.maps.event.addListener(point.marker, 'dragstart', function() {
@@ -92,13 +130,14 @@ function addNewPoint() {
         google.maps.event.addListener(point.infowindow, 'closeclick', function() {
           point.marker.setVisible(false);
           map.setOptions({draggableCursor: null});
+          document.getElementById('select_div').style.display = 'none';
         });
       });
     }
   });
 }
 
-function editPoint(id) {
+function editPoint(resource, id) {
   var ind;
   var editMarker;
   var origin_info;
@@ -114,7 +153,7 @@ function editPoint(id) {
 
   var editForm = fillNewForm(editMarker.marker.getPosition());
   editForm.childNodes[1].title.value = editMarker.title;
-  editForm.childNodes[1].title.value = editMarker.title;
+  editForm.childNodes[1].description.value = editMarker.description;
 
   editMarker.infowindow = addInfoWindow(editForm);
   editMarker.infowindow.open(map, editMarker.marker);
@@ -123,11 +162,11 @@ function editPoint(id) {
 
   document.getElementById('pButton').onclick = function() {
     editMarker.title = document.getElementById('title').value;
-    editMarker.title = document.getElementById('description').value;
+    editMarker.description = document.getElementById('description').value;
     editMarker.close();
        
-    var response = putIntoMongo(editMarker);
-    var info = fillWhatExists(response);
+    var response = putIntoMongo(resource, editMarker);
+    var info = fillWhatExists('/points/', response);
     var pos = new google.maps.LatLng(response.lat, response.lng);
 
     editMarker = new Marker(addMarker(pos), addInfoWindow(info));
@@ -178,6 +217,7 @@ function checkInPool(point, property, value) {
 
 
 function geoLocation() {
+  document.getElementById('select_div').style.display = 'none';
   if (checkInPool(point, 'manual', true)){
     point.close();
     markersPool.splice(markersPool.indexOf(point), 1);
@@ -251,21 +291,22 @@ function settings() {
   } else {
     settings_flag = false;
     document.getElementById('map_canvas').style.display = 'block';
-    document.getElementById('right_panel').style.display = 'none';
+    document.getElementById('settings_panel').style.display = 'none';
   }
 }
 
 function showCompany(id) {
   var company = getFromMongo('/companies/'+id);
-  var div_company = fillWhatExists(company);
+  var div_company = fillWhatExists('/companies/', company);
   div_company.style.minWidth = '450px';
   div_company.style.minHeight = '200px';
   var list_div = document.getElementById('companies_container');
   list_div.appendChild(div_company);
 }
 
-// END of the block with commands to Stations
+// END of the block with commands to Settings
 // ==========================================
+
 
 // ====================================
 // START of the constructor and methods
@@ -328,7 +369,7 @@ function convertDate(inputFormat) {
 }
 
 
-function fillWhatExists(source) {
+function fillWhatExists(resource, source) {
 
   var div_fromDB = document.createElement('div');
      div_fromDB.id = 'fromDB';
@@ -340,7 +381,7 @@ function fillWhatExists(source) {
         var span_header_text = document.createElement('span');
            span_header_text.id = 'title'+'~'+source._id;
            span_header_text.ondblclick = function(){
-              transform(this, source._id);
+              transform(resource, this, source._id);
            };
            span_header_text.style.marginRight = '10px';
            span_header_text.appendChild( document.createTextNode(source.title) );
@@ -348,7 +389,7 @@ function fillWhatExists(source) {
 
         var span_editPen = document.createElement('span');
            span_editPen.onclick = function(){
-              editPoint(source._id);
+              editPoint(resource, source._id);
            };
            span_editPen.id = 'editPen';
            span_editPen.title = 'Edit this point';
@@ -370,7 +411,7 @@ function fillWhatExists(source) {
            span_time.id = 'date'+'~'+source.date;
            span_time.innerHTML = convertDate(source.date);
            span_time.ondblclick = function(){
-              transform(this, source._id);
+              transform(resource, this, source._id);
             };
         div_date.appendChild( span_time );
 
@@ -380,7 +421,7 @@ function fillWhatExists(source) {
         div_infoBody.id = 'description'+'~'+source.description;
         div_infoBody.textContent = source.description;
         div_infoBody.ondblclick = function(){
-              transform(this, source._id);
+              transform(resource, this, source._id);
            };
         div_infoBody.style.marginBottom = '10px';
      div_fromDB.appendChild( div_infoBody );
@@ -391,10 +432,14 @@ function fillWhatExists(source) {
         var span_del = document.createElement('span');
           span_del.id = 'delete';
            span_del.onclick = function(){
-              deleteFromMongo(source._id);
+            if (source.hasOwnProperty('company')){
+              deleteFromMongo('/stations/', source._id);
+            } else {
+              deleteFromMongo('/points/', source._id);
+            }
            };
            span_del.className = 'delButton';
-           span_del.title = 'Delete this point';
+           span_del.title = 'Delete this object';
            span_del.textContent = '✂';
         div_dButton.appendChild( span_del );
   //
@@ -404,7 +449,7 @@ function fillWhatExists(source) {
 }
 
 
-function transform (elem, id) {
+function transform (resource, elem, id) {
   var old = document.getElementById(elem.id);
 
   if (elem.id.split('~')[0] == 'title') {
@@ -454,7 +499,7 @@ function transform (elem, id) {
 
       var dataToPatch = {};
       dataToPatch['date'] = isoDate;
-      patchIntoMongo(id, dataToPatch);
+      patchIntoMongo(resource+'/'+id, dataToPatch);
 
     } else {
       old.textContent = input.value;
@@ -463,7 +508,7 @@ function transform (elem, id) {
       var dataToPatch = {};
       dataToPatch[elem.id.split('~')[0]] = input.value;
       dataToPatch['date'] = new Date();
-      patchIntoMongo(id, dataToPatch);
+      patchIntoMongo(resource+'/'+id, dataToPatch);
     }
   };
 
@@ -493,6 +538,10 @@ function postToMongo(url) {
         description: document.getElementById('description').value,
         date: now
     };
+    if (url == '/stations'){
+      var selForm = document.getElementById('select_form');
+      data.company = selForm.options[selForm.selectedIndex].text;
+    }
 
     var request = new XMLHttpRequest();
 
@@ -502,7 +551,7 @@ function postToMongo(url) {
 
     var response = JSON.parse(request.responseText);
     var pos = new google.maps.LatLng(response.lat, response.lng);
-    var info = fillWhatExists(response);
+    var info = fillWhatExists(url, response);
 
     if (checkInPool(point, 'current', true) || (checkInPool(point, 'manual', true))){
       point.close();
@@ -510,20 +559,24 @@ function postToMongo(url) {
       point = null;
     }
     point = new Marker(addMarker(pos), addInfoWindow(info));
-    point.marker.setTitle = response.gas_station;
+    point.marker.setTitle = response.title;
     point.infowindow.open(map, point.marker);
     point.id = response._id;
     point.description = response.description;
-    point.gas_station = response.gas_station;
+    point.gas_station = response.title;
+    if (current_res === '/stations') {
+        point.stations = true;
+        point.marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+      }
     markersPool.push(point);
     return point;
 }
 
 
-function deleteFromMongo(id) {
+function deleteFromMongo(resource, id) {
   var request = null;
   var pointToDelete = {'id': id};
-  var url = '/points/' + id;
+  var url = resource + id;
   request = new XMLHttpRequest();
   request.open('DELETE', url, false);
   request.setRequestHeader('Content-type', 'application/json');
@@ -539,19 +592,19 @@ function deleteFromMongo(id) {
 }
 
 
-function putIntoMongo(editMarker){
+function putIntoMongo(resource, editMarker){
   var request = null;
   var now = new Date();
   var pointToEdit = {
     _id: editMarker.id,
     lat: editMarker.marker.getPosition().lat(),
     lng: editMarker.marker.getPosition().lng(),
-    gas_station: editMarker.gas_station,
+    title: editMarker.title,
     description: editMarker.description,
     date: now
   };
 
-  var url = '/points/' + editMarker.id;
+  var url = resource + editMarker.id;
   request = new XMLHttpRequest();
   request.open('PUT', url, false);
   request.setRequestHeader('Content-type', 'application/json');
@@ -564,7 +617,7 @@ function putIntoMongo(editMarker){
 
 function patchIntoMongo(id, dataToPatch){
   var request = null;
-  var url = '/points/' + id;
+  var url = id;
   request = new XMLHttpRequest();
   request.open('PATCH', url, false);
   request.setRequestHeader('Content-type', 'application/json');
