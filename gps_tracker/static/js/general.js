@@ -320,6 +320,10 @@ function showCompany(id) {
   for (var i=0; i<stations_of_company.length; i++) {
     var div_station = fillWhatExists('/stations/', stations_of_company[i]);
     div_station.childNodes[0].removeChild(div_station.childNodes[0].childNodes[1]);
+    div_station.style.border = '1px dotted #80B280';
+    div_station.style.borderRadius = '3px';
+    div_station.style.padding = '10px';
+    div_station.style.minWidth = '300px';
     stations_list.appendChild(div_station);
 
   }
