@@ -163,6 +163,7 @@ button.btn {
   position: relative;
   font-size: 18px;
   color: #333;
+  min-width: 280px;
 }
 
 

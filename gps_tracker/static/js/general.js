@@ -26,8 +26,8 @@ function initialize() {
 function drawSavedPoints() {
   var points = getFromMongo('/points');
   var stations = getFromMongo('/stations');
-  for (var i=0; i<stations.length; i++) {
-    points.push(stations[i]);
+  for (var k=0; k<stations.length; k++) {
+    points.push(stations[k]);
   }
   if (points.length === 0) {
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -58,7 +58,16 @@ function drawSavedPoints() {
 
 
 function addNew(resource) {
-  current_res = resource
+  current_res = resource;
+  if (checkInPool(point, 'current', true) || (checkInPool(point, 'manual', true)) || (checkInPool(point, 'stations', true))) {
+    clearInterval(intervalID);
+    point.close();
+    markersPool.splice(markersPool.indexOf(point), 1);
+    point = null;
+  }
+  chosen = false;
+  map.setOptions({draggableCursor:'crosshair'});
+
   if (resource === '/stations') {
     document.getElementById('select_div').style.display = 'block';
     var sel = document.getElementById('select_form');
@@ -80,15 +89,6 @@ function addNew(resource) {
     document.getElementById('select_div').style.display = 'none';
   }
 
-  if (checkInPool(point, 'current', true) || (checkInPool(point, 'manual', true))) {
-    clearInterval(intervalID);
-    point.close();
-    markersPool.splice(markersPool.indexOf(point), 1);
-    point = null;
-  }
-  chosen = false;
-  map.setOptions({draggableCursor:'crosshair'});
-
   google.maps.event.addListener(map, 'click', function(event) {
     if (!chosen) {
       var pos = event.latLng;
@@ -100,7 +100,7 @@ function addNew(resource) {
       point.manual = true;
       document.getElementById('pButton').onclick = function() {
         postToMongo(current_res);
-      }
+      };
 
       if (current_res === '/stations') {
         point.stations = true;
@@ -298,7 +298,7 @@ function settings() {
 function showCompany(id) {
   var company = getFromMongo('/companies/'+id);
   var div_company = fillWhatExists('/companies/', company);
-  div_company.style.minWidth = '450px';
+  // div_company.style.minWidth = '450px';
   div_company.style.minHeight = '200px';
   
   var list_div = document.getElementById('companies_container');  
